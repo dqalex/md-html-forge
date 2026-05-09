@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&display=swap');
+
+@import 'tailwindcss';
+
+/* ================================================================
+   md-html-forge · Design Tokens
+   定位：editorial-grade IDE · ivory + clay + serif
+   ================================================================ */
+
+@theme {
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  /* ==== Primary: Clay (editorial accent) ==== */
+  --color-clay-50:  #fdf5ee;
+  --color-clay-100: #fae5d6;
+  --color-clay-200: #f4c8a7;
+  --color-clay-300: #eba778;
+  --color-clay-400: #e28a54;
+  --color-clay-500: #d97757;
+  --color-clay-600: #b85f3e;
+  --color-clay-700: #924833;
+  --color-clay-900: #5c2d20;
+
+  /* ==== Neutral: Ivory → Slate (the whole grayscale) ==== */
+  --color-ivory-50:  #fdfcf8;
+  --color-ivory-100: #faf9f5;
+  --color-ivory-200: #f5f2ec;
+  --color-ivory-300: #ede9e0;
+  --color-ivory-400: #d9d4c8;
+  --color-ivory-500: #b5aea0;
+  --color-ivory-600: #87867f;
+  --color-ivory-700: #5c5a54;
+  --color-ivory-800: #3d3d3a;
+  --color-ivory-900: #1a1915;
+}
+
+:root {
+  /* ==== Surface layers (ivory stack) ==== */
+  --background:        var(--color-ivory-100);  /* 整体米底 */
+  --surface:           #ffffff;                  /* 卡片/面板 */
+  --surface-sunken:    var(--color-ivory-200);  /* 下沉区（toolbar bar） */
+  --surface-hover:     var(--color-ivory-200);
+  --surface-active:    var(--color-ivory-300);
+
+  /* ==== Text ==== */
+  --text-primary:      var(--color-ivory-900);
+  --text-secondary:    var(--color-ivory-700);
+  --text-tertiary:     var(--color-ivory-600);
+  --text-quaternary:   var(--color-ivory-500);
+  --text-inverse:      var(--color-ivory-50);
+
+  /* ==== Border (ultra-subtle for editorial feel) ==== */
+  --border:            var(--color-ivory-300);
+  --border-subtle:     rgba(0, 0, 0, 0.04);
+  --border-strong:     var(--color-ivory-400);
+
+  /* ==== Semantic ==== */
+  --accent:            var(--color-clay-500);
+  --accent-soft:       var(--color-clay-100);
+  --accent-strong:     var(--color-clay-600);
+  --accent-foreground: #ffffff;
+
+  /* ==== Legacy compat（保留一轮过渡期） ==== */
+  --foreground:        var(--text-primary);
+  --muted:             var(--surface-hover);
+  --muted-foreground:  var(--text-tertiary);
+  --primary:           var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --ivory:             var(--color-ivory-100);
+  --paper:             var(--color-ivory-200);
+  --ink:               var(--text-primary);
+
+  /* ==== Radius scale ==== */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-panel: var(--radius-lg);
+
+  /* ==== Shadows (editorial · soft + warm) ==== */
+  --shadow-xs:  0 1px 2px rgba(26, 25, 21, 0.04);
+  --shadow-sm:  0 1px 3px rgba(26, 25, 21, 0.06), 0 1px 2px rgba(26, 25, 21, 0.04);
+  --shadow-md:  0 4px 12px -2px rgba(26, 25, 21, 0.08), 0 2px 4px -2px rgba(26, 25, 21, 0.04);
+  --shadow-lg:  0 12px 28px -8px rgba(26, 25, 21, 0.12), 0 4px 10px -4px rgba(26, 25, 21, 0.05);
+  --shadow-xl:  0 28px 56px -12px rgba(26, 25, 21, 0.18), 0 10px 20px -6px rgba(26, 25, 21, 0.08);
+
+  /* ==== Focus ring ==== */
+  --ring:            rgba(217, 119, 87, 0.35);
+  --ring-offset:     var(--surface);
+
+  /* ==== Motion ==== */
+  --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast:   120ms;
+  --duration-base:   200ms;
+  --duration-slow:   320ms;
+
+  /* ==== Layout ==== */
+  --header-height:   52px;
+  --toolbar-height:  44px;
+}
+
+/* ====== Tailwind v4 @theme inline 语义映射 ====== */
+@theme inline {
+  --color-background:        var(--background);
+  --color-foreground:        var(--text-primary);
+  --color-surface:           var(--surface);
+  --color-surface-sunken:    var(--surface-sunken);
+  --color-surface-hover:     var(--surface-hover);
+  --color-muted:             var(--muted);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-border:            var(--border);
+  --color-primary:           var(--accent);
+  --color-primary-foreground: var(--accent-foreground);
+  --color-accent:            var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+}
+
+/* ====== Base ====== */
+html, body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  border-color: var(--border);
+}
+
+/* Serif 衬线渲染（标题场景） */
+.font-serif,
+.editorial h1, .editorial h2, .editorial h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Mono（用于 @directive / code） */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ====== Scrollbar (warm ivory) ====== */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-ivory-400);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ivory-500);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* ====== CodeMirror base theme ====== */
+.cm-editor-container .cm-editor {
+  height: 100%;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.cm-editor-container .cm-editor .cm-scroller {
+  font-family: var(--font-mono);
+  line-height: 1.7;
+}
+.cm-editor-container .cm-editor.cm-focused {
+  outline: none;
+}
+.cm-editor-container .cm-gutters {
+  background: var(--surface);
+  border-right: 1px solid var(--border-subtle);
+  color: var(--text-quaternary);
+}
+.cm-editor-container .cm-activeLineGutter,
+.cm-editor-container .cm-activeLine {
+  background: var(--color-ivory-100);
+}
+.cm-editor-container .cm-selectionBackground {
+  background: var(--color-clay-100) !important;
+}
+.cm-editor-container .cm-cursor {
+  border-left-color: var(--accent);
+  border-left-width: 1.5px;
+}
+
+/* ====== Utility：focus ring ====== */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ====== Animations ====== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn var(--duration-base) var(--ease-out);
+}
