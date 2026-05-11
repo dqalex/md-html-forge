@@ -26,3 +26,12 @@ pnpm-debug.log*
 # editor
 .vscode/
 .idea/
+
+# codebuddy / AI workspace state (persisted but not versioned)
+.codebuddy/
+
+# local one-off scripts / playwright cli cache
+/audit-script.mjs
+/demo-today-sprint.md
+/playwright-cli.json
+/.playwright-cli/
