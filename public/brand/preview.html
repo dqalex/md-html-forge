@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>md-html-forge · brand preview</title>
+<style>
+  :root {
+    --ivory: #FAF9F5;
+    --slate: #141413;
+    --clay: #D97757;
+    --gray-500: #87867F;
+    --gray-300: #D1CFC5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ivory);
+    color: var(--slate);
+    font-family: ui-serif, Georgia, serif;
+    padding: 56px 24px 120px;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 28px; margin: 0 0 8px; font-weight: 600; }
+  .sub { color: var(--gray-500); margin: 0 0 40px; font-family: ui-monospace, monospace; font-size: 13px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card {
+    border: 1px solid var(--gray-300);
+    border-radius: 12px;
+    background: #fff;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .card.dark { background: var(--slate); color: var(--ivory); border-color: transparent; }
+  .card h3 { margin: 0; font-size: 14px; font-weight: 600; font-family: ui-monospace, monospace; letter-spacing: 0.02em; }
+  .card p { margin: 0; font-size: 12px; color: var(--gray-500); font-family: ui-monospace, monospace; }
+  .card.dark p { color: rgba(250,249,245,0.6); }
+  .row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; min-height: 80px; }
+  .row img { display: block; }
+  .small { width: 24px; height: 24px; }
+  .mid   { width: 48px; height: 48px; }
+  .large { width: 72px; height: 72px; }
+  .horizontal img { height: 56px; width: auto; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    background: color-mix(in srgb, var(--clay) 12%, transparent);
+    color: var(--clay); font-size: 10px; font-family: ui-monospace, monospace;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .full { grid-column: 1 / -1; }
+  footer { margin-top: 48px; font-size: 12px; color: var(--gray-500); font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>md-html-forge · brand</h1>
+  <p class="sub">file://public/brand/* &nbsp;·&nbsp; logos, marks &amp; favicon</p>
+
+  <div class="grid">
+
+    <!-- mark default -->
+    <div class="card">
+      <div>
+        <span class="tag">logo-mark.svg</span>
+        <h3 style="margin-top:8px">图标 · 浅色</h3>
+        <p>默认使用；README、文档、浅色底</p>
+      </div>
+      <div class="row">
+        <img src="./logo-mark.svg" class="small" alt="">
+        <img src="./logo-mark.svg" class="mid" alt="">
+        <img src="./logo-mark.svg" class="large" alt="">
+      </div>
+    </div>
+
+    <!-- mark dark -->
+    <div class="card dark">
+      <div>
+        <span class="tag">logo-mark-dark.svg</span>
+        <h3 style="margin-top:8px; color: var(--ivory)">图标 · 深色</h3>
+        <p>深色主题页、分享卡、品牌包面板</p>
+      </div>
+      <div class="row">
+        <img src="./logo-mark-dark.svg" class="small" alt="">
+        <img src="./logo-mark-dark.svg" class="mid" alt="">
+        <img src="./logo-mark-dark.svg" class="large" alt="">
+      </div>
+    </div>
+
+    <!-- mono -->
+    <div class="card" style="background: linear-gradient(135deg, #FFF 0%, #F0EEE6 100%)">
+      <div>
+        <span class="tag">logo-mark-mono.svg</span>
+        <h3 style="margin-top:8px">单色版 · currentColor 驱动</h3>
+        <p>父元素 color 决定 logo 颜色，随主题一键换色</p>
+      </div>
+      <div class="row">
+        <span style="color: var(--slate)"><img src="./logo-mark-mono.svg" class="mid" alt=""></span>
+        <span style="color: var(--clay)"><img src="./logo-mark-mono.svg" class="mid" alt=""></span>
+        <span style="color: #0066FF"><img src="./logo-mark-mono.svg" class="mid" alt=""></span>
+        <span style="color: #788C5D"><img src="./logo-mark-mono.svg" class="mid" alt=""></span>
+      </div>
+    </div>
+
+    <!-- favicon -->
+    <div class="card">
+      <div>
+        <span class="tag">favicon.svg</span>
+        <h3 style="margin-top:8px">Favicon 32×32</h3>
+        <p>小尺寸：去边框、粗笔、火花加大</p>
+      </div>
+      <div class="row">
+        <!-- 16, 24, 32, 48 px 真实尺寸实测 -->
+        <div style="text-align:center">
+          <img src="./favicon.svg" style="width:16px;height:16px;display:block" alt="">
+          <span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--gray-500)">16</span>
+        </div>
+        <div style="text-align:center">
+          <img src="./favicon.svg" style="width:24px;height:24px;display:block" alt="">
+          <span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--gray-500)">24</span>
+        </div>
+        <div style="text-align:center">
+          <img src="./favicon.svg" style="width:32px;height:32px;display:block" alt="">
+          <span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--gray-500)">32</span>
+        </div>
+        <div style="text-align:center">
+          <img src="./favicon.svg" style="width:48px;height:48px;display:block" alt="">
+          <span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--gray-500)">48</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- horizontal -->
+    <div class="card full horizontal">
+      <div>
+        <span class="tag">logo-horizontal.svg</span>
+        <h3 style="margin-top:8px">横版 · 带产品名 + 副标题</h3>
+        <p>README 顶部、官网 header、社交分享</p>
+      </div>
+      <div class="row" style="justify-content: flex-start; gap: 48px">
+        <img src="./logo-horizontal.svg" alt="md-html-forge">
+      </div>
+    </div>
+
+    <!-- context demo -->
+    <div class="card full">
+      <div>
+        <span class="tag">in context</span>
+        <h3 style="margin-top:8px">场景预览</h3>
+        <p>浏览器标签 / GitHub social / 文档顶栏</p>
+      </div>
+
+      <!-- 浏览器标签 -->
+      <div style="display:flex; align-items:center; gap:12px">
+        <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px 6px 8px; background: var(--slate); color: var(--ivory); border-radius:6px; font-family: ui-monospace, monospace; font-size: 12px">
+          <img src="./favicon.svg" style="width:14px;height:14px" alt="">
+          md-html-forge
+        </div>
+        <span style="font-family:ui-monospace,monospace;font-size:11px;color:var(--gray-500)">tab</span>
+      </div>
+
+      <!-- 顶栏 -->
+      <div style="display:flex; align-items:center; gap:16px; padding: 10px 16px; border: 1px solid var(--gray-300); border-radius: 8px">
+        <img src="./logo-mark.svg" style="width:28px;height:28px" alt="">
+        <span style="font-family:ui-monospace,monospace;font-weight:600">md-html-forge</span>
+        <span style="flex:1"></span>
+        <span style="font-family:ui-monospace,monospace;font-size:11px;color:var(--gray-500)">header · 44px tall</span>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    brand kit · all SVGs hand-optimized · drop in and use.
+  </footer>
+</div>
+</body>
+</html>

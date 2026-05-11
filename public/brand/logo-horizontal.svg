@@ -1,0 +1,40 @@
+<!--
+  md-html-forge · Horizontal logo (带产品名 + 副标题)
+  viewBox 280×64：左侧 mark 64×64，右侧字组
+  字体：JetBrains Mono / ui-monospace 兜底，呼应项目里的 forge 指令语言
+  副标题 "markdown → html" 用一道 clay 箭头代替 → 以保证字体缺失时也能读对
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none">
+  <!-- ====== 左侧 mark ====== -->
+  <g>
+    <rect x="2" y="2" width="60" height="60" rx="12" fill="#FAF9F5" stroke="#141413" stroke-width="2.5"/>
+    <path d="M14 18 L14 46" stroke="#141413" stroke-width="3" stroke-linecap="round"/>
+    <path d="M32 18 L32 46" stroke="#141413" stroke-width="3" stroke-linecap="round"/>
+    <path d="M14 18 L23 32 L32 18" stroke="#141413" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M23 32 L41 32" stroke="#D97757" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="23" cy="32" r="2.2" fill="#D97757"/>
+    <path d="M50 18 L50 46" stroke="#141413" stroke-width="3" stroke-linecap="round"/>
+    <path d="M41 32 L50 32" stroke="#141413" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- ====== 右侧字组 ====== -->
+  <!-- 主标题：md-html-forge -->
+  <text x="78" y="32" fill="#141413"
+        font-family="'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace"
+        font-size="18" font-weight="600" letter-spacing="-0.01em">
+    md-html-forge
+  </text>
+
+  <!-- 副标题：markdown → html，视觉上更轻 -->
+  <!-- 用一道 clay 箭头替代 → 字符，避免字体渲染差异 -->
+  <g transform="translate(78, 44)">
+    <text x="0" y="10" fill="#87867F"
+          font-family="'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="10" letter-spacing="0.02em">markdown</text>
+    <!-- 箭头 -->
+    <path d="M65 7 L77 7 M73 3 L77 7 L73 11" stroke="#D97757" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <text x="82" y="10" fill="#87867F"
+          font-family="'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace"
+          font-size="10" letter-spacing="0.02em">html</text>
+  </g>
+</svg>
