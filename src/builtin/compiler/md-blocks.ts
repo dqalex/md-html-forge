@@ -74,7 +74,12 @@ export function scanMdBlocks(
   }
 
   let i = 0;
+  // 防御性总迭代上限
+  const MAX_ITER = Math.max(1000, lines.length * 4);
+  let iter = 0;
   while (i < lines.length) {
+    if (++iter > MAX_ITER) break;
+    const cursorBefore = i;
     const line = lines[i]!;
     const trimmed = line.text.trim();
 
@@ -252,6 +257,9 @@ export function scanMdBlocks(
       loc: makeLoc(startLine.start, endLine.end, lineStarts),
     });
     i = j;
+
+    // 全局兜底：本轮如果 i 没推进则强制 +1
+    if (i === cursorBefore) i = cursorBefore + 1;
   }
 
   return blocks;

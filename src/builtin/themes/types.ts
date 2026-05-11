@@ -47,8 +47,24 @@ export interface ThemeDef {
   // ===== 视觉 =====
   /** 卡片/面板背景 */
   surface?: string;
+  /**
+   * 次级表面色（比 surface 更"下沉"一档的浅色底块）。
+   * 用于：代码块底 / 行内 code / 输入框 / 二级信息卡的 chunk 背景 / 分组列表的条纹。
+   * 映射到 CSS 变量 `--gray-100`（历史命名，语义实为"次级表面"）。
+   *
+   * 浅色主题：通常是 #F5-F8 之间的一档淡灰
+   * 深色主题：**必须** 给一个比 surface 再深或相近的深色值，否则 dark 下的代码块会出现"大块米色方块"
+   */
+  surfaceSunken?: string;
   /** 卡片/面板边框 */
   border?: string;
+  /**
+   * 细分割线颜色（比 border 更弱、用于行间分隔 / 虚线框 / 禁用态边框）。
+   * 映射到 CSS 变量 `--gray-300`。
+   *
+   * 深色主题如果不覆盖，默认值 #D1CFC5（浅色）会在深底上形成扎眼亮边。
+   */
+  borderSubtle?: string;
   /** 圆角 */
   radius?: string;
 
@@ -61,6 +77,21 @@ export interface ThemeDef {
    * 通过 @page 指令可以覆盖本主题的 bandStyle
    */
   bandStyle?: 'contained' | 'full-bleed';
+
+  // ===== 段留白（contained 模式下有背景色时生效） =====
+  /**
+   * 段**外**留白：当前段与上下相邻段/内容之间的垂直呼吸（CSS margin）。
+   * 默认 '16px 0'。背景色与外层不同的主题段（如 dark 插入 ivory 页面）
+   * 建议调大（24-32px），让背景块不至于"紧贴其他内容"显得拥挤。
+   *
+   * 取 CSS margin shorthand 语法，如 '24px 0' / '32px 0 40px'。
+   */
+  sectionGap?: string;
+  /**
+   * 段**内**留白：段容器内边距（CSS padding）。
+   * 默认 '24px 28px'。想让内容在有色段内更"松"，调大这个值（例如 '40px 36px'）。
+   */
+  sectionInset?: string;
 
   // ===== 自定义 CSS（高级用法） =====
   /** 主题专属 CSS 字符串，作用于 .theme-<id> 选择器内 */

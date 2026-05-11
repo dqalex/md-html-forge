@@ -42,11 +42,37 @@ export function tokenize(source: string): Token[] {
   const tokens: Token[] = [];
   const n = source.length;
   const lineStarts = computeLineStarts(source);
+  // 预扫 fenced code 区间（[start, end)），主循环中遇到 `<!--` 若落在
+  // 任一区间内就跳过 —— Markdown 规范：fenced code 内不参与外层解析。
+  // 这修了"文档里写 forge 语法示例时，示例里的 `<!-- @slot:x -->` 会被
+  // lexer 当真实指令扫进来"的假诊断问题。
+  const fencedRanges = collectFencedCodeRanges(source);
 
   let cursor = 0;
+  // 防御性总迭代上限
+  const MAX_ITER = Math.max(1000, source.length);
+  let iter = 0;
 
   while (cursor < n) {
+    if (++iter > MAX_ITER) break;
+    const cursorBefore = cursor;
     const next = source.indexOf('<!--', cursor);
+
+    if (next < 0) {
+      pushTextIfAny(tokens, source, cursor, n, lineStarts);
+      break;
+    }
+    // 若 `<!--` 落在 fenced code 内，整体作为 text 吞到 fenced 结束
+    const inFence = findFenceContaining(fencedRanges, next);
+    if (inFence) {
+      pushTextIfAny(tokens, source, cursor, inFence.end, lineStarts);
+      cursor = inFence.end;
+      if (cursor === cursorBefore) cursor = cursorBefore + 1;
+      continue;
+    }
+    if (next > cursor) {
+      pushTextIfAny(tokens, source, cursor, next, lineStarts);
+    }
 
     if (next < 0) {
       pushTextIfAny(tokens, source, cursor, n, lineStarts);
@@ -72,18 +98,121 @@ export function tokenize(source: string): Token[] {
         attrs: matched.attrs,
         loc: makeLoc(next, commentEnd, lineStarts),
       });
-    } else {
-      tokens.push({
-        kind: 'text',
-        value: source.slice(next, commentEnd),
-        loc: makeLoc(next, commentEnd, lineStarts),
-      });
     }
+    // 非 forge 指令的 HTML 注释（如 <!-- ─── 分割线 ─── -->、<!-- TODO -->）
+    // 静默丢弃 — 它们对最终渲染无意义，绝不能进入 text token
+    // 否则会被 resolver/emitter 当成裸 markdown 兜底渲染出来
 
     cursor = commentEnd;
+    // 全局兜底：游标必须前进
+    if (cursor === cursorBefore) cursor = cursorBefore + 1;
   }
 
   return tokens;
+}
+
+// ===== Fenced code block 跳过 =====
+
+interface FenceRange { start: number; end: number }
+
+/**
+ * 预扫整份源，返回所有 fenced code 的 [start, end) 区间。
+ *
+ * 识别规则（与 CommonMark 对齐的最小子集）：
+ *   - 起 fence 所在行前导空白 ≤ 3 个
+ *   - fence 由 3+ 个连续的 ` 或 ~ 组成
+ *   - 闭合 fence 须同字符、同或更多长度，闭合后只能有空白
+ *
+ * 这样之后，lexer 主循环遇到落在任一区间内的 `<!--`，直接把整块当 text 吞掉，
+ * 示例代码里的 `<!-- @slot:x -->` / `<!-- @/slot -->` 就不会被误当真实指令。
+ */
+function collectFencedCodeRanges(source: string): FenceRange[] {
+  const ranges: FenceRange[] = [];
+  const n = source.length;
+  let i = 0;
+  while (i < n) {
+    // 推进到行首
+    // i 如果不是行首，先找下一行首
+    if (i > 0 && source.charCodeAt(i - 1) !== 10) {
+      const nl = source.indexOf('\n', i);
+      if (nl < 0) break;
+      i = nl + 1;
+      continue;
+    }
+    // 读取前导 0-3 空格
+    let p = i;
+    let leading = 0;
+    while (leading < 4 && p < n && source.charCodeAt(p) === 32) { p++; leading++; }
+    if (leading >= 4) { // 视为 indented code，不是 fenced；直接跳到下一行
+      const nl = source.indexOf('\n', p);
+      i = nl < 0 ? n : nl + 1;
+      continue;
+    }
+    const fenceChar = source.charCodeAt(p);
+    if (fenceChar !== 96 /* ` */ && fenceChar !== 126 /* ~ */) {
+      const nl = source.indexOf('\n', p);
+      i = nl < 0 ? n : nl + 1;
+      continue;
+    }
+    let fenceLen = 0;
+    while (p + fenceLen < n && source.charCodeAt(p + fenceLen) === fenceChar) fenceLen++;
+    if (fenceLen < 3) {
+      const nl = source.indexOf('\n', p + fenceLen);
+      i = nl < 0 ? n : nl + 1;
+      continue;
+    }
+    const start = i; // 连 fence 开行一起算入
+    // 到本行末
+    let lineEnd = source.indexOf('\n', p + fenceLen);
+    if (lineEnd < 0) { ranges.push({ start, end: n }); break; }
+    // 开始扫闭合
+    let scan = lineEnd + 1;
+    let closed = false;
+    while (scan < n) {
+      const nextNl = source.indexOf('\n', scan);
+      const lineEndAbs = nextNl < 0 ? n : nextNl;
+      let q = scan;
+      let pad = 0;
+      while (pad < 4 && q < lineEndAbs && source.charCodeAt(q) === 32) { q++; pad++; }
+      if (pad < 4 && source.charCodeAt(q) === fenceChar) {
+        let closeLen = 0;
+        while (q + closeLen < lineEndAbs && source.charCodeAt(q + closeLen) === fenceChar) closeLen++;
+        if (closeLen >= fenceLen) {
+          let after = q + closeLen;
+          let tailOk = true;
+          while (after < lineEndAbs) {
+            const cc = source.charCodeAt(after);
+            if (cc !== 32 && cc !== 9) { tailOk = false; break; }
+            after++;
+          }
+          if (tailOk) {
+            const end = nextNl < 0 ? n : nextNl + 1;
+            ranges.push({ start, end });
+            i = end;
+            closed = true;
+            break;
+          }
+        }
+      }
+      if (nextNl < 0) break;
+      scan = nextNl + 1;
+    }
+    if (!closed) {
+      ranges.push({ start, end: n });
+      break;
+    }
+  }
+  return ranges;
+}
+
+/** 二分找包含 offset 的 fenced code 区间（不在则返回 null）。 */
+function findFenceContaining(ranges: FenceRange[], offset: number): FenceRange | null {
+  // 线性即可（文档级通常不过几十个 fence）
+  for (const r of ranges) {
+    if (offset >= r.start && offset < r.end) return r;
+    if (r.start > offset) break;
+  }
+  return null;
 }
 
 // ===== 指令识别 =====

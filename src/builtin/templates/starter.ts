@@ -17,7 +17,7 @@ export type StarterMode = 'sample' | 'skeleton';
 
 /** 当 layout.sampleChildren 重复同一 id 时，循环使用不同变体让示范更生动 */
 const SAMPLE_VARIANTS: Record<string, Array<Record<string, string>>> = {
-  'feature-card': [
+  card: [
     {
       cardIcon: 'zap', cardTitle: '极速渲染',
       cardBody: '从 MD 到样式 HTML，**纯前端、零后端**，所见即所得。',
@@ -35,11 +35,10 @@ const SAMPLE_VARIANTS: Record<string, Array<Record<string, string>>> = {
       cardBody: '保留 \\`**bold**\\` / 列表 / 表格 / 代码块的完整支持。',
     },
   ],
-  'stat-card': [
-    { statValue: '20+', statLabel: 'Built-in Components', statDelta: 'expanding to 122' },
-    { statValue: '8', statLabel: 'Default Templates', statDelta: 'all composable' },
-    { statValue: '80+', statLabel: 'Lucide Icons', statDelta: 'tree-shaken' },
-    { statValue: '0', statLabel: 'Backend Required', statDelta: 'pure frontend' },
+  chip: [
+    { riskLabel: 'Low risk', riskLevel: 'safe' },
+    { riskLabel: 'Needs review', riskLevel: 'medium' },
+    { riskLabel: 'Attention', riskLevel: 'attention' },
   ],
 };
 
@@ -70,7 +69,7 @@ export function generateStarterMarkdown(
       lines.push(...renderLayoutBlock(comp, componentMap, mode));
       lines.push('');
     } else {
-      lines.push(`<!-- ─── ${comp.name} (${id}) ─── -->`);
+      lines.push(`<!-- ${comp.name} -->`);
       for (const [slotName, slotDef] of Object.entries(comp.slots)) {
         if (seenSlots.has(slotName)) continue;
         seenSlots.add(slotName);
@@ -116,7 +115,7 @@ function renderLayoutBlock(
   mode: StarterMode,
 ): string[] {
   const lines: string[] = [];
-  lines.push(`<!-- ─── ${layout.name} (${layout.id}) ─── -->`);
+  lines.push(`<!-- ${layout.name} -->`);
 
   // 布局自身的 slot
   for (const [slotName, slotDef] of Object.entries(layout.slots)) {

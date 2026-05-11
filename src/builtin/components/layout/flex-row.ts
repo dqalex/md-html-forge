@@ -17,5 +17,5 @@ export default makeLayout({
 }
 .comp-layout-flex-row .layout-children > * { flex: 0 0 auto; }
   `.trim(),
-  sampleChildren: ['feature-card', 'feature-card'],
+  sampleChildren: ['chip', 'chip'],
 });

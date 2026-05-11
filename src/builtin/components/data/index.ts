@@ -1,9 +1,5 @@
-import SummaryBand from './summary-band';
-import Metrics from './metrics';
-import Table from './table';
+import TypeScaleRow from './type-scale-row';
 
 export const DATA_COMPONENTS = [
-  SummaryBand,
-  Metrics,
-  Table,
+  TypeScaleRow,
 ];

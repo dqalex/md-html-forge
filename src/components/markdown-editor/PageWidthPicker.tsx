@@ -9,16 +9,18 @@ import {
   type BandStyle,
 } from '@/builtin';
 import { Button, Popover, PanelSection } from '@/components/ui';
+import { useI18n } from '@/lib/i18n';
 
-const PRESETS: Array<{ id: PageWidthPreset; label: string; hint: string }> = [
-  { id: 'mobile',  label: '手机',    hint: '420px · 移动预览' },
-  { id: 'narrow',  label: '窄',      hint: '680px · 博客 / 文章' },
-  { id: 'reading', label: '阅读',    hint: '760px · 长文' },
-  { id: 'default', label: '平衡',    hint: '880px · 默认' },
-  { id: 'wide',    label: '宽',      hint: '1080px · PC' },
-  { id: 'xwide',   label: '超宽',    hint: '1280px · 看板' },
-  { id: 'full',    label: '自适应',  hint: '100% · 容器跟随' },
-];
+const PRESET_IDS: PageWidthPreset[] = ['mobile', 'narrow', 'reading', 'default', 'wide', 'xwide', 'full'];
+const PRESET_I18N_KEYS: Record<string, { label: string; hint: string }> = {
+  mobile:  { label: 'pageWidth.mobile.label',  hint: 'pageWidth.mobile.hint' },
+  narrow:  { label: 'pageWidth.narrow.label',  hint: 'pageWidth.narrow.hint' },
+  reading: { label: 'pageWidth.reading.label', hint: 'pageWidth.reading.hint' },
+  default: { label: 'pageWidth.default.label', hint: 'pageWidth.default.hint' },
+  wide:    { label: 'pageWidth.wide.label',    hint: 'pageWidth.wide.hint' },
+  xwide:   { label: 'pageWidth.xwide.label',   hint: 'pageWidth.xwide.hint' },
+  full:    { label: 'pageWidth.full.label',     hint: 'pageWidth.full.hint' },
+};
 
 export interface PageWidthPickerProps {
   markdown: string;
@@ -26,10 +28,13 @@ export interface PageWidthPickerProps {
 }
 
 export function PageWidthPicker({ markdown, onChange }: PageWidthPickerProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   const current = parsePageConfig(markdown);
-  const label = resolveLabel(current?.width);
+  const rawLabel = resolveLabel(current?.width);
+  // Translate the label: if it matches a preset id, use i18n; otherwise use raw
+  const label = PRESET_I18N_KEYS[rawLabel] ? t(PRESET_I18N_KEYS[rawLabel]!.label as any) : (rawLabel === '页宽' ? t('pageWidth.defaultLabel') : rawLabel);
 
   const apply = (presetId: PageWidthPreset, band?: BandStyle) => {
     const directive = `<!-- @page ${presetId}${band ? ` band=${band}` : ''} -->`;
@@ -51,7 +56,7 @@ export function PageWidthPicker({ markdown, onChange }: PageWidthPickerProps) {
         icon={<MonitorIcon />}
         iconRight={<ChevronDownIcon />}
         onClick={() => setOpen(true)}
-        title="页面宽度与段样式"
+        title={t('pageWidth.title')}
       >
         {label}
       </Button>
@@ -62,23 +67,24 @@ export function PageWidthPicker({ markdown, onChange }: PageWidthPickerProps) {
         anchor="top-right"
         width={300}
       >
-        <PanelSection title="页面宽度">
+        <PanelSection title={t('pageWidth.sectionTitle')}>
           <ul className="py-1">
-            {PRESETS.map((p) => {
-              const matched = current?.width === PAGE_WIDTH_PRESETS[p.id];
+            {PRESET_IDS.map((presetId) => {
+              const matched = current?.width === PAGE_WIDTH_PRESETS[presetId];
+              const i18nKey = PRESET_I18N_KEYS[presetId]!;
               return (
-                <li key={p.id}>
+                <li key={presetId}>
                   <button
                     type="button"
-                    onClick={() => apply(p.id, current?.band)}
+                    onClick={() => apply(presetId, current?.band)}
                     className="w-full flex items-center justify-between px-4 py-1.5 hover:bg-[color:var(--surface-hover)] transition-colors"
                   >
                     <div className="flex items-baseline gap-2 min-w-0">
                       <span className={`text-sm font-medium ${matched ? 'text-[color:var(--accent-strong)]' : 'text-[color:var(--text-primary)]'}`}>
-                        {p.label}
+                        {t(i18nKey.label as any)}
                       </span>
                       <span className="text-[11px] text-[color:var(--text-tertiary)] font-mono truncate">
-                        {p.hint}
+                        {t(i18nKey.hint as any)}
                       </span>
                     </div>
                     {matched && <CheckIcon className="h-3.5 w-3.5 text-[color:var(--accent)] shrink-0" />}
@@ -89,12 +95,12 @@ export function PageWidthPicker({ markdown, onChange }: PageWidthPickerProps) {
           </ul>
         </PanelSection>
 
-        <PanelSection title="Banner 通栏">
+        <PanelSection title={t('pageWidth.bandTitle')}>
           <div className="px-4 py-2 flex items-center justify-between">
             <div className="min-w-0">
-              <div className="text-sm text-[color:var(--text-primary)]">带主题段铺满视口</div>
+              <div className="text-sm text-[color:var(--text-primary)]">{t('pageWidth.bandDesc')}</div>
               <div className="text-[11px] text-[color:var(--text-tertiary)] mt-0.5">
-                深色 / 彩色主题推荐开启
+                {t('pageWidth.bandHint')}
               </div>
             </div>
             <button
@@ -119,10 +125,11 @@ export function PageWidthPicker({ markdown, onChange }: PageWidthPickerProps) {
 
 function resolveLabel(width: string | undefined): string {
   if (!width) return '页宽';
+  // Note: this runs before i18n is available, returns raw width value
+  // The button itself uses the default label from i18n when no width is set
   for (const [key, val] of Object.entries(PAGE_WIDTH_PRESETS)) {
     if (val === width) {
-      const p = PRESETS.find(x => x.id === key);
-      if (p) return p.label;
+      return key;
     }
   }
   return width;

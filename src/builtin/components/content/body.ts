@@ -45,9 +45,9 @@ if (def?.type === 'content') {
 .comp-body p { font-size: 15px; line-height: 1.75; margin: 0 0 12px; color: var(--gray-700); }
 .comp-body ul, .comp-body ol { padding-left: 1.4em; margin: 8px 0 14px; }
 .comp-body li { line-height: 1.7; color: var(--gray-700); margin-bottom: 4px; }
-.comp-body blockquote { border-left: 2.5px solid var(--clay); padding: 6px 16px; margin: 14px 0; background: rgba(217,119,87,0.06); }
+.comp-body blockquote { border-left: 2.5px solid var(--clay); padding: 6px 16px; margin: 14px 0; background: color-mix(in srgb, var(--clay) 6%, transparent); }
 .comp-body strong { color: var(--slate); }
-.comp-body pre { background: var(--slate); color: #E8E6DE; border-radius: var(--radius-panel); padding: 16px 18px; overflow-x: auto; margin: 14px 0; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+.comp-body pre { background: var(--slate); color: var(--gray-100); border-radius: var(--radius-panel); padding: 16px 18px; overflow-x: auto; margin: 14px 0; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
 .comp-body pre code { background: transparent; color: inherit; padding: 0; }
   `.trim(),
   html: (s) => {

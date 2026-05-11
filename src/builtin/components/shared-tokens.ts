@@ -46,10 +46,15 @@ li { line-height: 1.7; color: var(--gray-700); margin-bottom: 4px; }
 strong { color: var(--slate); }
 a { color: var(--clay); text-decoration: none; border-bottom: 1px solid transparent; }
 a:hover { border-bottom-color: var(--clay); }
-blockquote { border-left: 2.5px solid var(--clay); padding: 4px 16px; margin: 14px 0; background: rgba(217,119,87,0.06); border-radius: 0 6px 6px 0; }
+blockquote { border-left: 2.5px solid var(--clay); padding: 4px 16px; margin: 14px 0; background: color-mix(in srgb, var(--clay) 6%, transparent); border-radius: 0 6px 6px 0; }
 table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
 th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--gray-300); color: var(--gray-500); font-weight: 500; font-size: 12px; letter-spacing: 0.03em; text-transform: uppercase; }
 td { padding: 10px; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+
+/* ===== 编辑器选中态（仅预览模式生效，导出时被 stripEditorAttrs 移除选中） ===== */
+[data-forge-component-id] { position: relative; transition: outline 0.12s ease; }
+[data-forge-component-id]:hover { outline: 1px dashed color-mix(in srgb, var(--clay) 50%, transparent); outline-offset: 4px; }
+[data-forge-component-id].forge-selected { outline: 2px solid var(--clay); outline-offset: 4px; }
 `.trim();
 
 // ===== 共享工具：判空（注释/占位符也算空） =====

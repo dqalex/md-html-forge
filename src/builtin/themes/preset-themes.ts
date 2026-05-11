@@ -28,7 +28,16 @@ const DARK: ThemeDef = {
   accentSoft: '#E3DACC',
   muted: '#87867F',
   surface: '#1F1F1E',
+  // "下沉一档"的浅底：code 背景、行内 code、输入框、引用块等等
+  // 在 dark 下必须用比 surface 深或相近的深色，否则这些地方会变"米色方块"
+  surfaceSunken: '#28282A',
   border: '1px solid rgba(227,218,204,0.18)',
+  // 细分割线：比 border 更弱，避免扎眼亮线
+  borderSubtle: 'rgba(227,218,204,0.12)',
+  // dark 段插在浅色页面里时，段外要有足够呼吸；段内内容更松一点
+  // 让深色块看起来是"独立一段"而不是"紧贴前后内容"
+  sectionGap: '32px 0',
+  sectionInset: '36px 36px',
 };
 
 const SAGE: ThemeDef = {
@@ -42,6 +51,8 @@ const SAGE: ThemeDef = {
   accent: '#788C5D',
   accentSoft: '#A4B583',
   surface: '#FFFFFF',
+  surfaceSunken: '#EDEBE0',
+  borderSubtle: '#D7D5C6',
 };
 
 const COBALT: ThemeDef = {
@@ -55,6 +66,8 @@ const COBALT: ThemeDef = {
   accent: '#0056FF',
   accentSoft: '#60A5FA',
   surface: '#FFFFFF',
+  surfaceSunken: '#E8EFFF',
+  borderSubtle: '#CBD7F0',
   fontSerif: '"Inter", system-ui, sans-serif',
 };
 
@@ -69,6 +82,8 @@ const SUNSET: ThemeDef = {
   accent: '#D97757',
   accentSoft: '#FFE0CC',
   surface: '#FFFFFF',
+  surfaceSunken: '#FCE9DA',
+  borderSubtle: '#EBD1BC',
 };
 
 const MONO: ThemeDef = {
@@ -83,9 +98,24 @@ const MONO: ThemeDef = {
   accentSoft: '#666666',
   muted: '#999999',
   surface: '#FFFFFF',
+  surfaceSunken: '#F5F5F5',
   border: '1px solid #DDDDDD',
+  borderSubtle: '#EEEEEE',
   fontSerif: 'Georgia, "Times New Roman", serif',
 };
+
+/**
+ * 推荐主题清单（3 个核心主题）
+ *
+ * 产品方向：预设少 + 自定义能力强
+ * - editorial：默认 ivory + clay + serif
+ * - dark：深色 + oat 强调
+ * - mono：黑白印刷
+ *
+ * SAGE / COBALT / SUNSET 保留为「向后兼容主题」（旧文档引用不会断），
+ * 但不在 UI 主题选择器里暴露。
+ */
+export const RECOMMENDED_THEME_IDS = ['editorial', 'dark', 'mono'] as const;
 
 export const BUILTIN_THEMES: ThemeDef[] = [
   EDITORIAL,

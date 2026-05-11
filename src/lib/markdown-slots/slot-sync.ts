@@ -40,20 +40,55 @@ const ALLOWED_TAGS = [
   'strong', 'em', 'b', 'i', 'a', 'br', 'p', 'ul', 'ol', 'li', 'code', 'pre', 'span',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'hr', 'del',
   'table', 'thead', 'tbody', 'tr', 'td', 'th',
-  'div', 'img', 'mark', 'input',
-  // SVG 相关：给图标渲染放行
-  'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'g', 'defs', 'use', 'title',
+  'div', 'img', 'mark', 'input', 'section', 'article', 'aside', 'figure', 'figcaption',
+  'label', 'button',
+  // SVG：给图标 / 自定义 logo / 插图 完整放行
+  'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse',
+  'g', 'defs', 'use', 'title', 'desc', 'text', 'tspan', 'textPath',
+  'marker', 'symbol', 'clipPath', 'mask', 'pattern', 'filter',
+  'linearGradient', 'radialGradient', 'stop', 'foreignObject',
+  'animate', 'animateTransform', 'animateMotion', 'mpath', 'set',
 ];
 const ALLOWED_ATTRS = [
-  'href', 'target', 'rel', 'class', 'data-diagram', 'data-value',
-  'src', 'alt', 'style', 'type', 'checked', 'disabled',
-  // SVG 属性 + icon 标记
-  'data-lucide', 'xmlns', 'width', 'height', 'viewBox', 'fill', 'stroke',
-  'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'd', 'cx', 'cy', 'r',
-  'x', 'y', 'x1', 'y1', 'x2', 'y2', 'points', 'transform', 'aria-label',
+  'href', 'target', 'rel', 'class', 'id', 'data-diagram', 'data-value',
+  'src', 'alt', 'style', 'type', 'checked', 'disabled', 'role', 'tabindex',
+  'name', 'value', 'placeholder', 'for',
+  // SVG 常用属性（尽量全）
+  'data-lucide', 'xmlns', 'xmlns:xlink', 'xlink:href',
+  'width', 'height', 'viewBox', 'preserveAspectRatio',
+  'fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-opacity',
+  'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'stroke-dashoffset',
+  'opacity', 'visibility', 'display',
+  'd', 'cx', 'cy', 'cz', 'r', 'rx', 'ry',
+  'x', 'y', 'x1', 'y1', 'x2', 'y2', 'dx', 'dy',
+  'points', 'transform', 'transform-origin',
+  'text-anchor', 'dominant-baseline', 'alignment-baseline',
+  'font-family', 'font-size', 'font-weight', 'font-style', 'letter-spacing',
+  'marker-start', 'marker-mid', 'marker-end', 'markerWidth', 'markerHeight',
+  'refX', 'refY', 'orient', 'gradientUnits', 'gradientTransform',
+  'offset', 'stop-color', 'stop-opacity',
+  'clip-path', 'mask', 'filter',
+  'begin', 'dur', 'from', 'to', 'values', 'keyTimes', 'keySplines',
+  'attributeName', 'attributeType', 'repeatCount', 'fill-timing',
+  'aria-label', 'aria-labelledby', 'aria-describedby', 'aria-hidden',
   // 交互相关
   'data-mdslot', 'data-mdsrc',
 ];
+
+/**
+ * 被识别为"块级 HTML/SVG"的顶层标签白名单。
+ * 出现在 slot 开头/顶行时，simpleMdToHtml 会把它当作整体块原样透传，
+ * 由下游 sanitizeHtml 按 ALLOWED_TAGS / ALLOWED_ATTRS 清洗。
+ *
+ * 用户场景：
+ *   - 品牌 logo SVG
+ *   - 自定义插图 / 示意图
+ *   - 少量自定义 HTML 结构（如 figure、aside）
+ */
+const RAW_HTML_BLOCK_TAGS = new Set([
+  'svg', 'figure', 'aside', 'section', 'article',
+  'div', 'details', 'summary',
+]);
 
 // ===== MD → Slot 提取 =====
 
@@ -567,11 +602,52 @@ export function simpleMdToHtml(md: string): string {
   const lines = md.split('\n');
   const html: string[] = [];
   let i = 0;
+  // 防御性总迭代上限：以 lines.length * 4 作为合理上限。
+  // 即使存在 bug 让游标停滞，也会在合理次数后退出，并把剩余文本作为 fallback 抛出。
+  const MAX_ITER = Math.max(1000, lines.length * 4);
+  let iter = 0;
 
   while (i < lines.length) {
+    if (++iter > MAX_ITER) {
+      // 兜底退出：把剩余行原样输出，避免无限循环
+      const rest = lines.slice(i).join('\n').trim();
+      if (rest) html.push(`<p>${inlineMdToHtml(rest)}</p>`);
+      break;
+    }
+    const cursorBefore = i;
+
     const line = lines[i]!;
 
     if (line.trim() === '') { i++; continue; }
+
+    // HTML/SVG 块透传：用户直接写 <svg>...</svg> 或 <div>...</div> 等块级 HTML
+    // 为了支持品牌 logo / 插图 / 自定义容器，原样输出（由后续 sanitizeHtml 做安全清洗）
+    const rawBlockOpen = line.match(/^\s*<([a-zA-Z][a-zA-Z0-9-]*)(\s[^>]*)?>/);
+    if (rawBlockOpen && RAW_HTML_BLOCK_TAGS.has(rawBlockOpen[1]!.toLowerCase())) {
+      const tag = rawBlockOpen[1]!;
+      const closeRe = new RegExp(`</${tag}\\s*>`, 'i');
+      // 单行自闭合 <tag ... /> 或 <tag ...></tag> 同一行结束
+      if (/\/>\s*$/.test(line.trim()) || closeRe.test(line)) {
+        html.push(line);
+        i++;
+        continue;
+      }
+      // 多行：一直读到闭合标签所在的行
+      const blockLines: string[] = [line];
+      i++;
+      let depth = (line.match(new RegExp(`<${tag}[\\s>]`, 'gi')) || []).length
+                - (line.match(closeRe) || []).length;
+      while (i < lines.length) {
+        const cur = lines[i]!;
+        blockLines.push(cur);
+        depth += (cur.match(new RegExp(`<${tag}[\\s>]`, 'gi')) || []).length
+              -  (cur.match(closeRe) || []).length;
+        i++;
+        if (depth <= 0) break;
+      }
+      html.push(blockLines.join('\n'));
+      continue;
+    }
 
     // 水平线
     if (/^(-{3,}|\*{3,}|_{3,})\s*$/.test(line.trim())) {
@@ -620,12 +696,14 @@ export function simpleMdToHtml(md: string): string {
       let isHeader = true;
       while (i < lines.length && lines[i]!.trim().startsWith('|') && lines[i]!.trim().endsWith('|')) {
         const row = lines[i]!.trim();
-        if (/^\|[\s\-:]+\|$/.test(row.replace(/[^|\-:\s]/g, ''))) {
+        // 分隔行：每个单元格只含 -、: 和空白（如 |---|---| 或 |:---:|---:|）
+        const cellsRaw = row.slice(1, -1).split('|').map(c => c.trim());
+        if (cellsRaw.length > 0 && cellsRaw.every(c => /^:?-{2,}:?$/.test(c))) {
           i++;
           isHeader = false;
           continue;
         }
-        const cells = row.slice(1, -1).split('|').map(c => inlineMdToHtml(c.trim()));
+        const cells = cellsRaw.map(c => inlineMdToHtml(c));
         const tag = isHeader ? 'th' : 'td';
         tableRows.push(`<tr>${cells.map(c => `<${tag}>${c}</${tag}>`).join('')}</tr>`);
         if (isHeader) isHeader = false;
@@ -701,6 +779,7 @@ export function simpleMdToHtml(md: string): string {
     }
 
     // 普通段落
+    const paraStart = i;
     const paraLines: string[] = [];
     while (i < lines.length && lines[i]!.trim() !== '' &&
       !lines[i]!.trim().startsWith('#') &&
@@ -709,13 +788,29 @@ export function simpleMdToHtml(md: string): string {
       !lines[i]!.trim().startsWith('|') &&
       !/^\s*[-*]\s+/.test(lines[i]!) &&
       !/^\s*\d+\.\s+/.test(lines[i]!) &&
-      !/^(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i]!.trim())) {
+      !/^(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i]!.trim()) &&
+      // 不吞 HTML 块起始行（避免把 <svg ...> 当段落）
+      !(() => {
+        const m = lines[i]!.match(/^\s*<([a-zA-Z][a-zA-Z0-9-]*)/);
+        return !!(m && RAW_HTML_BLOCK_TAGS.has(m[1]!.toLowerCase()));
+      })()) {
       paraLines.push(inlineMdToHtml(lines[i]!));
       i++;
     }
     if (paraLines.length > 0) {
       html.push(`<p>${paraLines.join('<br />')}</p>`);
+    } else {
+      // 当前行同时被所有"块识别"分支拒绝（例如 #4211 这种带 # 但不是标题的内容）
+      // 把它当成一行段落输出，避免主循环死循环
+      const fallback = inlineMdToHtml(lines[i]!);
+      if (fallback.trim()) html.push(`<p>${fallback}</p>`);
+      i++;
+      // sanity check：确保游标始终在前进
+      if (i === paraStart) i = paraStart + 1;
     }
+
+    // 总循环防御：本轮如果 i 没推进则强制 +1，避免任何意外死循环
+    if (i === cursorBefore) i = cursorBefore + 1;
   }
 
   return html.join('\n');
@@ -910,6 +1005,39 @@ export function generateIframeScript(): string {
   const DEBOUNCE_MS = 100;
   let notifyTimer = null;
 
+  // 轻量 sanitizer：剔除 <script>、event handler 属性、javascript: 链接
+  // 用于 setText / replaceImage 等 innerHTML 注入入口的二次防线。
+  function sanitizeFragment(html) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = String(html == null ? '' : html);
+    const walker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_ELEMENT);
+    const remove = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const tag = node.tagName.toLowerCase();
+      if (tag === 'script' || tag === 'iframe' || tag === 'object' || tag === 'embed') {
+        remove.push(node);
+        continue;
+      }
+      for (const attr of Array.from(node.attributes)) {
+        const name = attr.name.toLowerCase();
+        const val = String(attr.value || '').trim().toLowerCase();
+        if (name.startsWith('on')) {
+          node.removeAttribute(attr.name);
+        } else if ((name === 'href' || name === 'src' || name === 'xlink:href') &&
+                   (val.startsWith('javascript:') || val.startsWith('data:text/html'))) {
+          node.removeAttribute(attr.name);
+        }
+      }
+    }
+    remove.forEach(n => n.remove());
+    return tpl.innerHTML;
+  }
+
+  function escapeAttr(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   function initElements() {
     const elements = document.querySelectorAll('[data-slot]');
     elements.forEach(el => {
@@ -1068,7 +1196,7 @@ export function generateIframeScript(): string {
         if (slotType === 'data') {
           el.textContent = value;
         } else {
-          el.innerHTML = value;
+          el.innerHTML = sanitizeFragment(value);
         }
         notifyChange();
         break;
@@ -1080,7 +1208,7 @@ export function generateIframeScript(): string {
         if (img) {
           img.src = value;
         } else {
-          el.innerHTML = '<img src="' + value + '" alt="" style="width:100%;height:auto;" />';
+          el.innerHTML = '<img src="' + escapeAttr(value) + '" alt="" style="width:100%;height:auto;" />';
         }
         notifyChange();
         break;

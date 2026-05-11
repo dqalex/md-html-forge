@@ -8,8 +8,8 @@ export default defineComponent({
   category: 'content',
   tags: ['faq', 'questions'],
   slots: {
-    qaHeading: { label: '区块标题', type: 'text', placeholder: 'FAQ / Open Questions' },
-    qa: { label: '内容（## 为问题）', type: 'content', placeholder: '## 问题 1?\n回答 1\n\n## 问题 2?\n回答 2' },
+    qaHeading: { label: '区块标题', type: 'text', placeholder: 'FAQ / Open Questions', bind: 'h2' },
+    qa: { label: '内容（## 为问题）', type: 'content', placeholder: '## 问题 1?\n回答 1\n\n## 问题 2?\n回答 2', bind: 'content' },
   },
   sample: {
     qaHeading: 'Open Questions',

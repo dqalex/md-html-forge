@@ -22,5 +22,5 @@ export default makeLayout({
   .comp-layout-grid-3 .layout-children { grid-template-columns: 1fr; }
 }
   `.trim(),
-  sampleChildren: ['feature-card', 'feature-card', 'feature-card'],
+  sampleChildren: ['card', 'card', 'card'],
 });

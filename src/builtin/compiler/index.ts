@@ -118,6 +118,7 @@ function doCompile(source: string, opts: CompileOptions): CompileResult {
       sections: resolved.sections,
       orphanSlotValues: resolved.orphanSlotValues,
       usedThemeIds: resolved.usedThemeIds,
+      freeText: resolved.freeText,
     },
     { ...opts.env, page: pageConfig },
   );

@@ -8,8 +8,8 @@ export default defineComponent({
   category: 'list',
   tags: ['todo', 'actions'],
   slots: {
-    actionsHeading: { label: '区块标题', type: 'text', placeholder: 'Action Items' },
-    actions: { label: '清单内容（建议用 Markdown checkbox）', type: 'content', placeholder: '- [ ] 修复 Bug A — Alice\n- [x] 已完成项' },
+    actionsHeading: { label: '区块标题', type: 'text', placeholder: 'Action Items', bind: 'h2' },
+    actions: { label: '清单内容（建议用 Markdown checkbox）', type: 'content', placeholder: '- [ ] 修复 Bug A — Alice\n- [x] 已完成项', bind: 'list' },
   },
   sample: {
     actionsHeading: 'Action Items',

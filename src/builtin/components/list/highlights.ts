@@ -8,8 +8,8 @@ export default defineComponent({
   category: 'list',
   tags: ['bullet', 'highlights'],
   slots: {
-    highlightsHeading: { label: '区块标题', type: 'text', placeholder: 'Highlights' },
-    highlights: { label: '亮点（Markdown 列表）', type: 'content', placeholder: '- **第一条亮点**：描述\n- **第二条亮点**：描述' },
+    highlightsHeading: { label: '区块标题', type: 'text', placeholder: 'Highlights', bind: 'h2' },
+    highlights: { label: '亮点（Markdown 列表）', type: 'content', placeholder: '- **第一条亮点**：描述\n- **第二条亮点**：描述', bind: 'list' },
   },
   sample: {
     highlightsHeading: 'Highlights',

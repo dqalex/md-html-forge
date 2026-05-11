@@ -12,6 +12,7 @@ import type { ComponentDef, ComponentCategory } from '@/builtin/types';
 import { parseComposeDirective } from '@/builtin/renderer';
 import { generateStarterMarkdown } from '@/builtin/templates/starter';
 import { Drawer, SearchInput, Button } from '@/components/ui';
+import { useI18n } from '@/lib/i18n';
 
 const CATEGORY_LABELS: Record<ComponentCategory, string> = {
   header:  'Header',
@@ -33,6 +34,7 @@ export interface ComponentLibraryPanelProps {
 }
 
 export function ComponentLibraryPanel({ markdown, onInsert, onClose }: ComponentLibraryPanelProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const groups = useMemo(() => groupBuiltinByCategory(), []);
 
@@ -68,7 +70,7 @@ export function ComponentLibraryPanel({ markdown, onInsert, onClose }: Component
       <div className="flex items-center justify-between h-[var(--header-height)] px-4 border-b border-[color:var(--border-subtle)] shrink-0">
         <div>
           <h2 className="font-serif text-[16px] font-medium text-[color:var(--text-primary)] leading-tight">
-            组件库
+            {t('compLib.title')}
           </h2>
           <p className="text-[11px] font-mono text-[color:var(--text-tertiary)] mt-0.5">
             {BUILTIN_COMPONENTS.length} · built-in / 120+ planned
@@ -78,7 +80,7 @@ export function ComponentLibraryPanel({ markdown, onInsert, onClose }: Component
           type="button"
           onClick={onClose}
           className="h-7 w-7 rounded-md hover:bg-[color:var(--surface-hover)] text-[color:var(--text-secondary)] flex items-center justify-center"
-          aria-label="关闭"
+          aria-label={t('compLib.close')}
         >
           <XIcon className="h-4 w-4" />
         </button>
@@ -86,14 +88,14 @@ export function ComponentLibraryPanel({ markdown, onInsert, onClose }: Component
 
       {/* Search */}
       <div className="px-4 py-3 shrink-0 border-b border-[color:var(--border-subtle)]">
-        <SearchInput value={query} onChange={setQuery} placeholder="搜索：名称 / 标签 / id" autoFocus />
+        <SearchInput value={query} onChange={setQuery} placeholder={t('compLib.searchPlaceholder')} autoFocus />
       </div>
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {totalCount === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-            <div className="text-sm text-[color:var(--text-tertiary)]">没有匹配的组件</div>
+            <div className="text-sm text-[color:var(--text-tertiary)]">{t('compLib.noMatch')}</div>
           </div>
         ) : (
           Object.entries(filteredGroups).map(([cat, comps]) => (
@@ -128,7 +130,7 @@ export function ComponentLibraryPanel({ markdown, onInsert, onClose }: Component
                             {inUse && (
                               <span className="inline-flex items-center gap-0.5 text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]">
                                 <CheckIcon className="h-2.5 w-2.5" />
-                                已用
+                                {t('compLib.inUse')}
                               </span>
                             )}
                           </div>
@@ -159,7 +161,7 @@ export function ComponentLibraryPanel({ markdown, onInsert, onClose }: Component
                           icon={<PlusIcon />}
                           onClick={() => handleInsert(comp)}
                         >
-                          {inUse ? 'Slot' : '插入'}
+                          {inUse ? 'Slot' : t('compLib.insert')}
                         </Button>
                       </div>
                     </li>
@@ -173,7 +175,7 @@ export function ComponentLibraryPanel({ markdown, onInsert, onClose }: Component
 
       {/* Footer */}
       <div className="px-4 py-2.5 border-t border-[color:var(--border-subtle)] bg-[color:var(--surface-sunken)] text-[11px] text-[color:var(--text-tertiary)] shrink-0">
-        点击「插入」会将组件追加到 <code className="font-mono text-[color:var(--accent)]">@compose</code> 并附带示例
+        {t('compLib.footer').split('@compose')[0]}<code className="font-mono text-[color:var(--accent)]">@compose</code>{t('compLib.footer').split('@compose')[1]}
       </div>
     </Drawer>
   );

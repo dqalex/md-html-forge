@@ -1,7 +1,7 @@
-import FeatureCard from './feature-card';
-import StatCard from './stat-card';
+import ReviewComment from './review-comment';
+import DragListItem from './drag-list-item';
 
 export const CARD_COMPONENTS = [
-  FeatureCard,
-  StatCard,
+  ReviewComment,
+  DragListItem,
 ];

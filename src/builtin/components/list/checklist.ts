@@ -8,8 +8,8 @@ export default defineComponent({
   category: 'list',
   tags: ['todo', 'checklist'],
   slots: {
-    checklistHeading: { label: '区块标题', type: 'text', placeholder: 'Test Plan' },
-    checklist: { label: '清单（Markdown checkbox）', type: 'content', placeholder: '- [x] 已完成\n- [ ] 待完成' },
+    checklistHeading: { label: '区块标题', type: 'text', placeholder: 'Test Plan', bind: 'h2' },
+    checklist: { label: '清单（Markdown checkbox）', type: 'content', placeholder: '- [x] 已完成\n- [ ] 待完成', bind: 'list' },
   },
   sample: {
     checklistHeading: 'Review Checklist',

@@ -8,7 +8,7 @@ export default defineComponent({
   category: 'header',
   tags: ['tags', 'chips', 'status'],
   slots: {
-    pills: { label: '标签（每行：文本|类型 sev/resolved/neutral）', type: 'content', placeholder: 'SEV-2|sev\nResolved|resolved\n47 min|neutral' },
+    pills: { label: '标签（每行：文本|类型 sev/resolved/neutral）', type: 'content', placeholder: 'SEV-2|sev\nResolved|resolved\n47 min|neutral', bind: 'content' },
   },
   sample: {
     pills: 'SEV-2|sev\nResolved|resolved\n47 min · 14:02–14:49|neutral\nowner · @alice|neutral',

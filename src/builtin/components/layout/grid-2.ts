@@ -19,5 +19,5 @@ export default makeLayout({
   .comp-layout-grid-2 .layout-children { grid-template-columns: 1fr; }
 }
   `.trim(),
-  sampleChildren: ['feature-card', 'feature-card'],
+  sampleChildren: ['card', 'card'],
 });

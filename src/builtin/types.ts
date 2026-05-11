@@ -58,7 +58,7 @@ export interface ComponentDef {
    *
    * 布局组件（isLayout=true）会额外收到 slots.__children__ —— 已渲染好的子组件 HTML 拼接串
    */
-  html: (slots: Record<string, string>) => string;
+  html: (slots: Record<string, string>, variant?: string) => string;
   /**
    * 是否是布局容器组件
    * - true: 该组件需要包裹其他组件，在 MD 里通过 @compose-group 嵌套子项
@@ -71,6 +71,35 @@ export interface ComponentDef {
    * 数组每个元素 = 一个 @item 块要使用的组件 id（必须存在于 BUILT-IN）
    */
   sampleChildren?: string[];
+  /**
+   * 可用变体清单（来自 .forge.md 的 ## Variants 段）
+   * 仅 forge 组件有；TS 旧组件无
+   */
+  variants?: string[];
+  /** 默认变体 id（来自 .forge.md 的 defaultVariant 字段） */
+  defaultVariant?: string;
+  /**
+   * 变体描述（id → 描述文字），用于 PropertyPanel 提示
+   */
+  variantDescriptions?: Record<string, string>;
+  /**
+   * 信任级别（来自 .forge.md 的 trust 字段）
+   *  - 'builtin'：内置/可信组件，mount JS 直接在主文档运行
+   *  - 'user'：用户/AI 生成组件，mount JS 在 sandbox iframe 中运行
+   */
+  trust?: 'builtin' | 'user';
+  /**
+   * === 选型指南字段（可选，组件选型页 /docs/slots 渲染用） ===
+   *
+   * 这些字段让 AI agent / 人类用户能"读懂组件是干什么的"，从而按场景挑选。
+   * 新组件强制要求填写；存量组件页面用现有字段 + 硬写文案兜底。
+   */
+  /** 何时用：2-4 条短描述，说明"哪些场景该选这个组件"（优先给 agent 看） */
+  whenToUse?: string[];
+  /** 何时别用：2-3 条短描述，说明"容易误选但实际上不适合"的场景 */
+  whenNot?: string[];
+  /** 关键 slot：决策者最该关注的 slot 名（通常 1-3 个） */
+  keySlots?: string[];
 }
 
 // ===== 模板 =====
@@ -90,8 +119,18 @@ export interface TemplateDef {
   name: string;
   /** 一句话说明 */
   description: string;
-  /** 缩略 emoji */
+  /** 缩略 emoji（已弃用，保留字段向后兼容；UI 实际使用 icon+color）*/
   emoji: string;
+  /**
+   * lucide 图标名（lucide-react 导出名），例：'FileText' / 'BarChart3' / 'Flame'
+   * TemplatePicker 会渲染为 lucide 图标；缺省时回退到 emoji
+   */
+  icon?: string;
+  /**
+   * 图标徽标背景色（配色调性），接收 CSS 变量或色值
+   * 例：'var(--accent-soft)' / '#FDE4D3'
+   */
+  color?: string;
   /** 分组 */
   group: TemplateGroup;
   /**
@@ -107,6 +146,12 @@ export interface TemplateDef {
   customComponents?: ComponentDef[];
   /** 启用该模板时填入编辑器的初始 MD */
   starterMarkdown: string;
+  /**
+   * 需要但当前尚未实现的组件 id 列表（可选）
+   * agent 做 html-effectiveness 还原时，若某些布局需要新组件，
+   * 在这里标注，待后续独立补齐。
+   */
+  missingComponents?: string[];
 }
 
 // ===== 渲染上下文 =====

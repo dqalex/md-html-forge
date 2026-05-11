@@ -73,6 +73,8 @@ export interface UseNode extends BaseNode {
   kind: 'Use';
   /** 显式指派组件 id 到当前段 */
   id: string;
+  /** 变体 id（如 compact / detailed） */
+  variant?: string;
 }
 
 export interface SlotNode extends BaseNode {
@@ -100,6 +102,8 @@ export interface GroupItemNode extends BaseNode {
   slots: SlotNode[];
   /** 子项原始 MD（保留给极端场景） */
   raw: string;
+  /** 变体 id（由 @item childId variant=xxx 指定） */
+  variant?: string;
 }
 
 export interface TextNode extends BaseNode {

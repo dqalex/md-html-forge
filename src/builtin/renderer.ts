@@ -15,6 +15,9 @@ import type { ThemeDef } from './themes/types';
 // @compose: a, b  或  @compose a, b  （冒号可选）
 const COMPOSE_PATTERN = /<!--\s*@compose\s*:?\s*([\w,\s-]+)\s*-->/;
 
+// 文档顶部第一个 @theme，用于决定整页默认主题（body/:root 级）
+const FIRST_THEME_PATTERN = /<!--\s*@theme\s*:?\s*([\w-]+)\s*-->/;
+
 export interface ComposeResult {
   html: string;
   componentIds: string[];
@@ -56,11 +59,20 @@ export function renderComposed(
     source = `<!-- @compose: ${template.componentIds.join(', ')} -->\n\n${md}`;
   }
 
+  // 默认主题 = 文档里第一个 @theme；读不到或该主题未注册时退回内置默认
+  //
+  // 这样工具栏上的"全局主题"切换（upsert 文档首个 @theme）就能影响整页 body 背景，
+  // 因为 emitter 会据此生成 :root + body 级的 rootThemeCss。
+  const firstThemeMatch = source.match(FIRST_THEME_PATTERN);
+  const firstThemeId = firstThemeMatch?.[1];
+  const defaultThemeId =
+    firstThemeId && themeMap.has(firstThemeId) ? firstThemeId : DEFAULT_THEME_ID;
+
   const result = compile(source, {
     env: {
       componentMap,
       themeMap,
-      defaultThemeId: DEFAULT_THEME_ID,
+      defaultThemeId,
       defaultLayoutId: 'stack',
       pageWidth,
     },

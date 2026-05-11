@@ -43,8 +43,13 @@ export function parse(source: string, tokens: Token[]): ParseResult {
 
   let i = 0;
   const peek = () => tokens[i];
+  // 防御性总迭代上限
+  const MAX_ITER = Math.max(1000, tokens.length * 2);
+  let iter = 0;
 
   while (i < tokens.length) {
+    if (++iter > MAX_ITER) break;
+    const cursorBefore = i;
     const tk = peek()!;
 
     switch (tk.kind) {
@@ -75,7 +80,7 @@ export function parse(source: string, tokens: Token[]): ParseResult {
           ? { kind: 'Layout', id: tk.value, loc: tk.loc }
           : tk.kind === 'theme'
           ? { kind: 'Theme', id: tk.value, loc: tk.loc }
-          : { kind: 'Use', id: tk.value, loc: tk.loc };
+          : { kind: 'Use', id: tk.value, variant: tk.attrs?.attrs?.variant as string | undefined, loc: tk.loc };
         children.push(node);
         i++;
         break;
@@ -119,6 +124,8 @@ export function parse(source: string, tokens: Token[]): ParseResult {
       default:
         i++;
     }
+    // 全局兜底：游标必须前进
+    if (i === cursorBefore) i = cursorBefore + 1;
   }
 
   const composeNodes = children.filter(c => c.kind === 'Compose') as { ids: string[]; loc: SourceLoc }[];
@@ -253,6 +260,13 @@ function parseItem(
   const slots: SlotNode[] = [];
   const rawStart = openTok.loc.end;
 
+  // 提取 variant 属性并从 attrs 中移除，避免被 expandAttrsToSlots 当成 slot
+  let variant: string | undefined;
+  if (openTok.attrs?.attrs?.variant) {
+    variant = openTok.attrs.attrs.variant;
+    delete openTok.attrs.attrs.variant;
+  }
+
   // 属性式 item：@item feature-card cardTitle="X" cardBody="Y"
   //   除 positional 外的所有 attrs 展开为 slot
   if (openTok.attrs) {
@@ -272,6 +286,7 @@ function parseItem(
           childId,
           slots,
           raw,
+          variant,
           loc: { start: openTok.loc.start, end: t.loc.end, line: openTok.loc.line, col: openTok.loc.col },
         },
         nextIndex: j + 1,
@@ -295,6 +310,7 @@ function parseItem(
       childId,
       slots,
       raw,
+      variant,
       loc: { start: openTok.loc.start, end: source.length, line: openTok.loc.line, col: openTok.loc.col },
     },
     nextIndex: tokens.length,

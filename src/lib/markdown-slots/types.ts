@@ -5,11 +5,18 @@
  * 设计：MD 用 <!-- @slot:name -->...<!-- @/slot --> 标记，HTML 用 data-slot="name" 标记
  */
 
-// content: MD 渲染（标题、文字、列表、表格等）
-// image: 图片 URL
-// data: 数据指标（纯数值/短文本，textContent 注入）
-// text: 纯文本（不做 MD 渲染）
-// richtext: 富文本（MD 渲染 + DOMPurify 清洗）
+// ------------------------------------------------------------------
+// SlotType
+//
+// 对外（给 AI / 用户的 .forge.md 规范）只暴露 3 种：
+//   - 'text'     纯文本（不做 MD 渲染）
+//   - 'content'  Markdown 渲染（标题/列表/表格/段落混合）
+//   - 'data'     数据 DSL（pipe 分隔多列、textContent 注入，由组件 mount JS 解析）
+//
+// 内部还保留两种历史类型（供 universal-slots 等老路径继续工作）：
+//   - 'image'     图片 URL 提取（slide-cover 等组件依赖）
+//   - 'richtext'  @deprecated  与 'content' 行为一致；不要在新组件中使用
+// ------------------------------------------------------------------
 export type SlotType = 'content' | 'image' | 'data' | 'text' | 'richtext';
 
 /** 槽位定义 */

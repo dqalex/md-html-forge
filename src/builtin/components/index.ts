@@ -42,6 +42,8 @@ import { LIST_COMPONENTS } from './list';
 import { VISUAL_COMPONENTS } from './visual';
 import { LAYOUT_COMPONENTS } from './layout';
 import { FOOTER_COMPONENTS } from './footer';
+import { SPECIAL_COMPONENTS } from './special';
+import { FORGE_COMPONENTS } from './forge-registry';
 
 // ===== 聚合点（新 category 在这里加一行即可） =====
 
@@ -55,6 +57,8 @@ const GROUPS: ReadonlyArray<readonly ComponentDef[]> = [
   VISUAL_COMPONENTS,
   LAYOUT_COMPONENTS,
   FOOTER_COMPONENTS,
+  SPECIAL_COMPONENTS,
+  FORGE_COMPONENTS,
 ];
 
 // ===== 扁平化 + 唯一性校验（开发态）=====

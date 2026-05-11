@@ -11,7 +11,7 @@
  */
 
 import { syncMdToHtml, extractSlotsFromMd, simpleMdToHtml, sanitizeHtml, inlineMdToHtml } from './slot-sync';
-import { EFFECTIVENESS_BASE_CSS } from '@/templates/presets/_shared';
+import { SHARED_TOKENS_CSS } from '@/builtin/components/shared-tokens';
 import { parseComposeDirective } from '@/builtin/renderer';
 import { compile } from '@/builtin/compiler';
 import { forgeRegistry } from '@/builtin/compiler/registry';
@@ -84,11 +84,18 @@ function compileForPreview(
     source = `<!-- @compose: ${templateDef.componentIds.join(', ')} -->\n\n${mdContent}`;
   }
 
+  // 默认主题 = 文档首个 @theme（没有/未注册则回退内置默认）
+  // 这是"全局主题"能影响整页 body 背景的关键：emitter 会据此生成 :root+body CSS
+  const firstThemeMatch = source.match(/<!--\s*@theme\s*:?\s*([\w-]+)\s*-->/);
+  const firstThemeId = firstThemeMatch?.[1];
+  const defaultThemeId =
+    firstThemeId && themeMap.has(firstThemeId) ? firstThemeId : DEFAULT_THEME_ID;
+
   return compile(source, {
     env: {
       componentMap,
       themeMap,
-      defaultThemeId: DEFAULT_THEME_ID,
+      defaultThemeId,
       defaultLayoutId: 'stack',
       pageWidth: 880,
       mode,
@@ -202,7 +209,7 @@ function wrapInEditorial(body: string): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-${EFFECTIVENESS_BASE_CSS}
+${SHARED_TOKENS_CSS}
 .forge-doc { max-width: 720px; margin: 0 auto; padding: 56px 24px 120px; }
 .forge-doc .slot-block { margin-bottom: 28px; }
 .forge-doc .slot-label {
