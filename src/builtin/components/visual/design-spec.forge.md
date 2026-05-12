@@ -268,6 +268,8 @@ specContent:
   height: 2px;
   background: var(--gray-300);
   margin: 20px 8px 0;
+  font-size: 0;
+  color: transparent;
 }
 .comp-design-spec .ds-kf-key {
   position: absolute;
@@ -310,6 +312,7 @@ specContent:
 
 ```js
 (function() {
+  function run() {
   document.querySelectorAll('.comp-design-spec').forEach(function(el) {
   var variant = el.getAttribute('data-variant');
 
@@ -366,7 +369,8 @@ specContent:
     var dataSlot = el.querySelector('[data-slot="keyframes"]');
     var track = el.querySelector('.ds-kf-track');
     if (!dataSlot || !track) return;
-    var entries = (dataSlot.textContent || '').split(';').map(function(e) { return e.trim(); }).filter(Boolean);
+    var raw = (dataSlot.textContent || '').trim();
+    var entries = raw.split(';').map(function(e) { return e.trim(); }).filter(Boolean);
     track.innerHTML = '';
     entries.forEach(function(entry, idx) {
       var parts = entry.split('|').map(function(p) { return p.trim(); });
@@ -382,6 +386,12 @@ specContent:
     });
   }
   });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
 })();
 ```
 
