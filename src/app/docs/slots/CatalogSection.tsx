@@ -277,7 +277,10 @@ export function CatalogSection() {
 
 // ===================================================================
 
-function ComponentCard({ component, lang, t }: { component: ComponentDef; lang: string; t: (key: TranslationKey) => string }) {
+type TFn = (key: TranslationKey) => string;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TFnLoose = (key: any) => string;
+function ComponentCard({ component, lang, t }: { component: ComponentDef; lang: string; t: TFnLoose }) {
   const { id, name, category, tags, description, variants = [], variantDescriptions = {}, defaultVariant } = component;
   const fb = CATALOG_FALLBACK[id] || {};
   const whenToUse = component.whenToUse ?? (lang === 'zh' ? fb.whenToUse : fb.whenToUseEn) ?? fb.whenToUse;
