@@ -8,7 +8,7 @@
  *   <span>{t('header.syntax')}</span>
  */
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 export type Lang = 'zh' | 'en';
 
@@ -988,7 +988,7 @@ const EN = {
   'propPanel.doubleClickHint': 'Double-click text in preview to edit directly',
 };
 
-type TranslationKey = keyof typeof ZH;
+export type TranslationKey = keyof typeof ZH;
 
 const TRANSLATIONS: Record<Lang, typeof ZH> = { zh: ZH, en: EN };
 
@@ -1008,22 +1008,27 @@ const I18nContext = createContext<I18nContextValue>({
 
 // ===== Provider =====
 
+/** 读取客户端真实语言，仅在浏览器端调用 */
+function detectClientLang(): Lang {
+  const saved = localStorage.getItem('forge:lang') as Lang | null;
+  if (saved === 'zh' || saved === 'en') return saved;
+  const nav = navigator.language.toLowerCase();
+  if (nav.startsWith('zh')) return 'zh';
+  return 'en';
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window === 'undefined') return 'en';
-    // 优先读 localStorage；没有时按浏览器 navigator.language 推断；仍无则默认英文
-    const saved = localStorage.getItem('forge:lang') as Lang | null;
-    if (saved === 'zh' || saved === 'en') return saved;
-    const nav = typeof navigator !== 'undefined' ? navigator.language.toLowerCase() : '';
-    if (nav.startsWith('zh')) return 'zh';
-    return 'en';
-  });
+  // SSR 阶段始终用 'en'，避免与客户端不一致导致 hydration mismatch
+  const [lang, setLangState] = useState<Lang>('en');
+
+  // CSR 挂载后同步真实语言（此时 DOM 已与服务端一致，再变更不会报错）
+  useEffect(() => {
+    setLangState(detectClientLang());
+  }, []);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('forge:lang', l);
-    }
+    localStorage.setItem('forge:lang', l);
   }, []);
 
   const t = useCallback((key: TranslationKey): string => {

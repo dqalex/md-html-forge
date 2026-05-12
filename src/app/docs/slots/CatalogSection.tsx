@@ -6,6 +6,7 @@ import '@/builtin/bootstrap';
 import { FORGE_COMPONENTS, FORGE_SAMPLES } from '@/builtin/components/forge-registry';
 import { renderWithFallback } from '@/lib/markdown-slots/fallback-renderer';
 import { useI18n } from '@/lib/i18n';
+import type { TranslationKey } from '@/lib/i18n';
 import type { ComponentDef } from '@/builtin/types';
 
 /**
@@ -276,7 +277,7 @@ export function CatalogSection() {
 
 // ===================================================================
 
-function ComponentCard({ component, lang, t }: { component: ComponentDef; lang: string; t: (key: string) => string }) {
+function ComponentCard({ component, lang, t }: { component: ComponentDef; lang: string; t: (key: TranslationKey) => string }) {
   const { id, name, category, tags, description, variants = [], variantDescriptions = {}, defaultVariant } = component;
   const fb = CATALOG_FALLBACK[id] || {};
   const whenToUse = component.whenToUse ?? (lang === 'zh' ? fb.whenToUse : fb.whenToUseEn) ?? fb.whenToUse;
