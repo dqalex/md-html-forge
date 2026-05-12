@@ -263,7 +263,7 @@ legendItems:
     if (itemsEl && itemsEl.textContent) {
       var lines = itemsEl.textContent.split('\n').filter(l => l.trim());
       itemsEl.setAttribute('data-no-jump', '1');
-      itemsEl.innerHTML = lines.mapfunction((line, idx) {
+      itemsEl.innerHTML = lines.map(function(line, idx) {
         var [rawType, ...rest] = line.split('|');
         var chipType = rawType.trim().toLowerCase();
         var label = rest.join('|').trim();
@@ -278,13 +278,13 @@ legendItems:
       var activeSet = new Set(api.state.get('activeTypes', []) || []);
       var items = itemsEl.querySelectorAll('.le-item');
       var sync = function() {
-        items.forEachfunction((it) {
+        items.forEach(function(it) {
           var t = it.getAttribute('data-le-type') || '';
           it.classList.toggle('active', activeSet.has(t));
         });
       };
       sync();
-      items.forEachfunction((it) {
+      items.forEach(function(it) {
         it.addEventListener('click', function(e) {
           e.stopPropagation();
           var t = it.getAttribute('data-le-type') || '';

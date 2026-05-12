@@ -289,12 +289,13 @@ mockupRationale:
 ## JS
 
 ```js
-(function() {
-  document.querySelectorAll('.comp-comparison').forEach(function(el) {
+function mount(el, api) {
   var variant = el.getAttribute('data-variant');
-  var esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
+  var esc = function(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
+    });
+  };
 
   // ============ variant: ba — Before/After Tab 切换 ============
   if (variant === 'ba') {
@@ -303,13 +304,14 @@ mockupRationale:
     var tabs = el.querySelectorAll('.cp-ba-tab');
     var setView = function(view) {
       baEl.setAttribute('data-ba-view', view);
-      tabs.forEach((t) => t.classList.toggle('active', t.getAttribute('data-ba-target') === view));
+      tabs.forEach(function(t) {
+        t.classList.toggle('active', t.getAttribute('data-ba-target') === view);
+      });
       api.state.set('view', view);
     };
-    // 先取持久化状态，没有就用 'both'
     var saved = api.state.get('view', 'both');
-    setView(['both', 'before', 'after'].includes(saved) ? saved : 'both');
-    tabs.forEachfunction((tab) {
+    setView(['both', 'before', 'after'].indexOf(saved) >= 0 ? saved : 'both');
+    tabs.forEach(function(tab) {
       tab.addEventListener('click', function(e) {
         e.stopPropagation();
         setView(tab.getAttribute('data-ba-target') || 'both');
@@ -321,28 +323,33 @@ mockupRationale:
   // ============ variant: options — chip 可点切 active ============
   if (variant === 'options') {
     var chipsEl = el.querySelector('[data-slot="optionItems"]');
-    if (chipsEl && chipsEl.textContent) {
-      var lines = chipsEl.textContent.split('\n').map(v => v.trim()).filter(Boolean);
-      var savedIdx = parseInt(api.state.get('activeIdx', '0'), 10) || 0;
-      chipsEl.innerHTML = lines.map((line, i) =>
-        `<button type="button" class="cp-chip${i === savedIdx ? ' primary' : ''}" data-chip-idx="${i}">${esc(line)}</button>`
-      ).join('');
-      var chips = chipsEl.querySelectorAll('.cp-chip');
-      chips.forEachfunction((chip) {
-        chip.addEventListener('click', function(e) {
-          e.stopPropagation();
-          var idx = parseInt(chip.getAttribute('data-chip-idx') || '0', 10);
-          chips.forEach((c, i) => c.classList.toggle('primary', i === idx));
-          api.state.set('activeIdx', String(idx));
-          // 同时广播给宿主，方便后续做"决策→写回 MD"
-          api.emit('option-select', { index: idx, label: lines[idx] });
-        });
-      });
+    if (!chipsEl) return;
+    // 缓存原始数据：第一次 mount 时 textContent 是原始多行；
+    // 之后 innerHTML 被替换为 button，textContent 不再可解析，从 dataset 读回。
+    var rawLines = chipsEl.dataset.optsRaw;
+    if (rawLines === undefined) {
+      rawLines = chipsEl.textContent || '';
+      chipsEl.dataset.optsRaw = rawLines;
     }
+    var lines = rawLines.split('\n').map(function(v){return v.trim();}).filter(Boolean);
+    if (lines.length === 0) return;
+    var savedIdx = parseInt(api.state.get('activeIdx', '0'), 10) || 0;
+    chipsEl.innerHTML = lines.map(function(line, i) {
+      return '<button type="button" class="cp-chip' + (i === savedIdx ? ' primary' : '') + '" data-chip-idx="' + i + '">' + esc(line) + '</button>';
+    }).join('');
+    var chips = chipsEl.querySelectorAll('.cp-chip');
+    chips.forEach(function(chip) {
+      chip.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var idx = parseInt(chip.getAttribute('data-chip-idx') || '0', 10);
+        chips.forEach(function(c, i) { c.classList.toggle('primary', i === idx); });
+        api.state.set('activeIdx', String(idx));
+        api.emit('option-select', { index: idx, label: lines[idx] });
+      });
+    });
     return;
   }
-  });
-})();
+}
 ```
 
 ## Sample

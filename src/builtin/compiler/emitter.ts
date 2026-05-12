@@ -732,10 +732,12 @@ function buildInteractionScript(): string {
     .map((s) => {
       // 去掉 export 关键字、确保是 function mount(...) 形式
       const body = s.js.replace(/^\s*export\s+/m, '');
-      return `(function () {
+      // 用 try/catch 隔离每个组件的顶层副作用，避免某个组件 JS 抛错
+      // （例如顶层引用 api 这种 ReferenceError）中断后续组件的 mount 注册
+      return `try { (function () {
   ${body}
   if (typeof mount === 'function') window.__forgeMounts['${s.id}'] = mount;
-})();`;
+})(); } catch (err) { console.error('[forge] component "${s.id}" init error:', err); }`;
     })
     .join('\n');
 

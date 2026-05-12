@@ -187,7 +187,7 @@ panelData:
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
-  var html = raw.split('\n').map((line) => line.trim()).filter(Boolean).mapfunction((line) {
+  var html = raw.split('\n').map((line) => line.trim()).filter(Boolean).map(function(line) {
     var [term = '', def = ''] = line.split('|').map((s) => s.trim());
     return `<dt>${esc(term)}</dt><dd>${esc(def)}</dd>`;
   }).join('');

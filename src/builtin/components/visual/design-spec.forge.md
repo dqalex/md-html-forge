@@ -311,9 +311,7 @@ specContent:
 ## JS
 
 ```js
-(function() {
-  function run() {
-  document.querySelectorAll('.comp-design-spec').forEach(function(el) {
+function mount(el) {
   var variant = el.getAttribute('data-variant');
 
   if (variant === 'swatch') {
@@ -321,25 +319,33 @@ specContent:
     var borderSlot = el.querySelector('[data-slot="swatchBorder"]');
     if (chip) {
       var color = (chip.textContent || '').trim();
-      if (color) {
-        chip.style.background = color;
-      }
+      if (color) chip.style.background = color;
     }
     if (borderSlot) {
-      var val = (borderSlot.textContent || '').trim().toLowerCase();
-      if (/^(no|false|0|hide)$/.test(val)) {
-        if (chip) chip.classList.add('no-border');
-      }
+      var bv = (borderSlot.textContent || '').trim().toLowerCase();
+      if (/^(no|false|0|hide)$/.test(bv) && chip) chip.classList.add('no-border');
     }
+    return;
   }
 
   if (variant === 'spacing') {
     var sizeSlot = el.querySelector('[data-slot="spSize"]');
     var tokenSlot = el.querySelector('[data-slot="spToken"]');
-    var sizes = (sizeSlot ? sizeSlot.textContent : '').split(',').map(function(v) { return v.trim(); }).filter(Boolean);
-    var tokens = (tokenSlot ? tokenSlot.textContent : '').split(',').map(function(v) { return v.trim(); }).filter(Boolean);
     var container = el.querySelector('.ds-spacing');
     if (!container) return;
+    // 缓存原始数据到 dataset，避免 mount 再次调用时 textContent 已被替换
+    var sizesRaw = container.dataset.spSizes;
+    if (sizesRaw === undefined) {
+      sizesRaw = sizeSlot ? (sizeSlot.textContent || '') : '';
+      container.dataset.spSizes = sizesRaw;
+    }
+    var tokensRaw = container.dataset.spTokens;
+    if (tokensRaw === undefined) {
+      tokensRaw = tokenSlot ? (tokenSlot.textContent || '') : '';
+      container.dataset.spTokens = tokensRaw;
+    }
+    var sizes = sizesRaw.split(',').map(function(v){return v.trim();}).filter(Boolean);
+    var tokens = tokensRaw.split(',').map(function(v){return v.trim();}).filter(Boolean);
     container.innerHTML = '';
     var maxLen = Math.max(sizes.length, tokens.length);
     for (var i = 0; i < maxLen; i++) {
@@ -350,6 +356,7 @@ specContent:
       item.innerHTML = '<div class="ds-spacing-bar" style="width:' + size + 'px"></div><div class="ds-spacing-label">' + size + (token ? '<span>' + token + '</span>' : '') + '</div>';
       container.appendChild(item);
     }
+    return;
   }
 
   if (variant === 'radius') {
@@ -357,23 +364,28 @@ specContent:
     var valueSlot = el.querySelector('[data-slot="rsValue"]');
     var radiusEl = el.querySelector('.ds-radius');
     if (!radiusEl || !valueSlot) return;
-    var isShadow = /^(shadow)$/i.test((typeSlot ? typeSlot.textContent : '').trim());
+    var isShadow = /^(shadow)$/i.test((typeSlot ? (typeSlot.textContent || '') : '').trim());
     radiusEl.classList.add(isShadow ? 'is-shadow' : 'is-radius');
-    var val = (valueSlot.textContent || '').trim();
-    if (val) {
-      radiusEl.style[isShadow ? 'boxShadow' : 'borderRadius'] = val;
-    }
+    var rval = (valueSlot.textContent || '').trim();
+    if (rval) radiusEl.style[isShadow ? 'boxShadow' : 'borderRadius'] = rval;
+    return;
   }
 
   if (variant === 'keyframe') {
-    var dataSlot = el.querySelector('[data-slot="keyframes"]');
     var track = el.querySelector('.ds-kf-track');
-    if (!dataSlot || !track) return;
-    var raw = (dataSlot.textContent || '').trim();
-    var entries = raw.split(';').map(function(e) { return e.trim(); }).filter(Boolean);
+    if (!track) return;
+    // 缓存原始 keyframe 数据：第一次 mount 时 track.textContent 是原始 "label|time|pos;..."；
+    // 之后 innerHTML 被替换为生成的 .ds-kf-key 节点，textContent 不再可解析，
+    // 必须从 dataset 读回原始字符串。
+    var rawData = track.dataset.kfRaw;
+    if (rawData === undefined) {
+      rawData = (track.textContent || '').trim();
+      track.dataset.kfRaw = rawData;
+    }
+    var entries = rawData.split(';').map(function(e){return e.trim();}).filter(Boolean);
     track.innerHTML = '';
     entries.forEach(function(entry, idx) {
-      var parts = entry.split('|').map(function(p) { return p.trim(); });
+      var parts = entry.split('|').map(function(p){return p.trim();});
       var label = parts[0] || '';
       var time = parts[1] || '';
       var pos = parts[2] || '0';
@@ -384,15 +396,9 @@ specContent:
       key.innerHTML = '<em class="ds-kf-label">' + label + '</em><span class="ds-kf-time">' + time + '</span>';
       track.appendChild(key);
     });
+    return;
   }
-  });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', run);
-  } else {
-    run();
-  }
-})();
+}
 ```
 
 ## Sample

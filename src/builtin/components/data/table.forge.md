@@ -337,7 +337,7 @@ tableData:
     var originalRows = Array.from(tbody.querySelectorAll('tr'));
 
     var apply = function(col, dir) {
-      ths.forEachfunction((th, i) {
+      ths.forEach(function(th, i) {
         th.classList.toggle('sort-asc', i === col && dir === 'asc');
         th.classList.toggle('sort-desc', i === col && dir === 'desc');
       });
@@ -354,7 +354,7 @@ tableData:
         var m = v.replace(/[,_\s]/g, '').match(/^-?\d+(\.\d+)?$/);
         return m ? parseFloat(v.replace(/[,_\s]/g, '')) : null;
       };
-      rows.sortfunction((a, b) {
+      rows.sort(function(a, b) {
         var av = getCell(a);
         var bv = getCell(b);
         var an = tryNum(av), bn = tryNum(bv);
@@ -370,7 +370,7 @@ tableData:
     var saved = api.state.get('sort:' + key, null);
     if (saved && typeof saved.col === 'number' && saved.dir) apply(saved.col, saved.dir);
 
-    ths.forEachfunction((th, i) {
+    ths.forEach(function(th, i) {
       th.style.cursor = 'pointer';
       th.setAttribute('data-no-jump', '1');
       th.addEventListener('click', function(e) {
@@ -412,7 +412,7 @@ tableData:
     };
     var headHtml = '<div class="rt-row rt-head"><div class="rt-cell" data-rt-col="0">Risk</div><div class="rt-cell" data-rt-col="1">Severity</div><div class="rt-cell" data-rt-col="2">Mitigation</div></div>';
     var cellsList = rows.map((r) => r.split('|').map((s) => s.trim()));
-    var renderBody = (list) => list.mapfunction((cells) {
+    var renderBody = (list) => list.map(function(cells) {
       var desc = cells[0] || '';
       var sev = cells[1] || '';
       var miti = cells[2] || '';
@@ -430,7 +430,7 @@ tableData:
     };
     var sortKey = 'sort:risk';
     var apply = function(col, dir) {
-      dataEl.querySelectorAll('.rt-head .rt-cell').forEachfunction((c, i) {
+      dataEl.querySelectorAll('.rt-head .rt-cell').forEach(function(c, i) {
         c.classList.toggle('sort-asc', i === col && dir === 'asc');
         c.classList.toggle('sort-desc', i === col && dir === 'desc');
       });
@@ -438,7 +438,7 @@ tableData:
       dataEl.querySelectorAll('.rt-row:not(.rt-head)').forEach((r) => r.remove());
       var list = cellsList.slice();
       if (col != null && dir !== 'none') {
-        list.sortfunction((a, b) {
+        list.sort(function(a, b) {
           var cmp;
           if (col === 1) cmp = sevOrder(a[1]) - sevOrder(b[1]);
           else cmp = (a[col] || '').localeCompare(b[col] || '', undefined, { numeric: true, sensitivity: 'base' });
@@ -449,7 +449,7 @@ tableData:
     };
     var saved = api.state.get(sortKey, null);
     if (saved && typeof saved.col === 'number' && saved.dir) apply(saved.col, saved.dir);
-    dataEl.querySelectorAll('.rt-head .rt-cell').forEachfunction((cell, i) {
+    dataEl.querySelectorAll('.rt-head .rt-cell').forEach(function(cell, i) {
       cell.style.cursor = 'pointer';
       cell.setAttribute('data-no-jump', '1');
       cell.addEventListener('click', function(e) {
@@ -468,7 +468,7 @@ tableData:
 
   if (variant === 'impact') {
     // 每行 key|value，渲染为 <table><tr><th>k</th><td>v</td></tr>
-    var trs = rows.mapfunction((r) {
+    var trs = rows.map(function(r) {
       var [k = '', v = ''] = r.split('|').map((s) => s.trim());
       return `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`;
     }).join('');
@@ -478,7 +478,7 @@ tableData:
 
   if (variant === 'flag') {
     // 每行 key|描述|rollout|requires|state
-    var html = rows.mapfunction((r) {
+    var html = rows.map(function(r) {
       var [key = '', desc = '', rollout = '', requires = '', state = 'off'] = r.split('|').map((s) => s.trim());
       var stateClass = state.toLowerCase() === 'on' ? 'on' : 'off';
       var warnClass = (state.toLowerCase() === 'warn' || requires) ? 'warn' : '';
@@ -495,7 +495,7 @@ tableData:
     }).join('');
     dataEl.innerHTML = html;
     // flag 变体 toggle：点击 .fr-toggle 切换状态（持久化），并 emit 事件
-    dataEl.querySelectorAll('.fr-toggle').forEachfunction((tg) {
+    dataEl.querySelectorAll('.fr-toggle').forEach(function(tg) {
       tg.style.cursor = 'pointer';
       tg.setAttribute('data-no-jump', '1');
       var key = tg.getAttribute('data-flag-key') || '';
