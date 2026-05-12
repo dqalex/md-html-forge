@@ -139,6 +139,7 @@ const ZH = {
   // ========== 新增：SaveTemplateDialog ==========
   'saveDialog.title': '保存为模板',
   'saveDialog.desc': '把当前文档完整存为模板，下次一键拉起',
+  'saveDialog.nameLabel': '名称',
   'saveDialog.components': '个组件',
   'saveDialog.slots': '个 slot',
   'saveDialog.description': '描述',
@@ -626,6 +627,7 @@ const EN = {
   // ========== SaveTemplateDialog ==========
   'saveDialog.title': 'Save as Template',
   'saveDialog.desc': 'Save the current document as a template for quick reuse',
+  'saveDialog.nameLabel': 'Name',
   'saveDialog.components': 'components',
   'saveDialog.slots': 'slots',
   'saveDialog.description': 'Description',

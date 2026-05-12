@@ -553,6 +553,7 @@ interface BrandPackRowProps {
 }
 
 function BrandPackRow({ pack, active, expanded, onToggleExpand, onApply, onExport, onRequestDelete }: BrandPackRowProps) {
+  const { t } = useI18n();
   return (
     <li
       style={{
@@ -851,6 +852,7 @@ function CreateDialog({
 function PreviewSection({
   icon, label, count, items,
 }: { icon: React.ReactNode; label: string; count: number; items: string[] }) {
+  const { t } = useI18n();
   return (
     <div>
       <div className="flex items-center gap-1 mb-1.5" style={{ color: 'var(--text-secondary)' }}>
@@ -888,6 +890,7 @@ interface ConfirmDialogProps {
 }
 
 function ConfirmDialog({ title, desc, confirmLabel, danger, onCancel, onConfirm }: ConfirmDialogProps) {
+  const { t } = useI18n();
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center backdrop-blur-sm animate-fade-in"
