@@ -6,10 +6,12 @@
  *
  * 添加新组件包：在下面 IMPORTS 区追加一行 import + 在 SOURCES 数组里登记。
  *
- * 已注册组件包（17 个）：
- *   card / info-panel / list-item / list-row / timeline / table /
+ * 已注册组件包（27 个）：
+ *   card / product-card / info-panel / list-item / list-row / timeline / table /
  *   callout / panel / metric / pr-summary / comparison / progress /
- *   code-block / chip / design-spec / illustration / lead
+ *   code-block / chip / design-spec / illustration / lead /
+ *   cta-banner / steps-horizontal / chart-line / icon-nav / stat-badges / rating /
+ *   product-grid / category-panel / compare-table
  */
 
 import { parseForgeMd, forgeToComponentDef, getForgeJs } from './forge-loader';
@@ -19,14 +21,24 @@ import type { ComponentDef } from '../types';
 // 每个 .forge.md 都以 ?raw 形式导入；类型在 src/builtin/forge-md.d.ts 中声明
 
 import card from './card/card.forge.md?raw';
+import productCard from './card/product-card.forge.md?raw';
 import infoPanel from './card/info-panel.forge.md?raw';
 import listItem from './list/list-item.forge.md?raw';
 import listRow from './list/list-row.forge.md?raw';
 import timeline from './list/timeline.forge.md?raw';
+import stepsHorizontal from './list/steps-horizontal.forge.md?raw';
 import table from './data/table.forge.md?raw';
 import metric from './data/metric.forge.md?raw';
 import prSummary from './data/pr-summary.forge.md?raw';
+import chartLine from './data/chart-line.forge.md?raw';
+import statBadges from './data/stat-badges.forge.md?raw';
+import rating from './data/rating.forge.md?raw';
+import compareTable from './data/compare-table.forge.md?raw';
 import callout from './visual/callout.forge.md?raw';
+import ctaBanner from './visual/cta-banner.forge.md?raw';
+import productGrid from './visual/product-grid.forge.md?raw';
+import categoryPanel from './visual/category-panel.forge.md?raw';
+import iconNav from './visual/icon-nav.forge.md?raw';
 import panel from './visual/panel.forge.md?raw';
 import comparison from './visual/comparison.forge.md?raw';
 import progress from './visual/progress.forge.md?raw';
@@ -38,14 +50,24 @@ import lead from './summary/lead.forge.md?raw';
 
 const SOURCES: string[] = [
   card,
+  productCard,
   infoPanel,
   listItem,
   listRow,
   timeline,
+  stepsHorizontal,
   table,
   metric,
   prSummary,
+  chartLine,
+  statBadges,
+  rating,
+  compareTable,
   callout,
+  ctaBanner,
+  productGrid,
+  categoryPanel,
+  iconNav,
   panel,
   comparison,
   progress,

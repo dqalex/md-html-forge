@@ -68,6 +68,16 @@ phaseIntro:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的 pane ===== */
+.comp-lead .ld-lead,
+.comp-lead .ld-tldr,
+.comp-lead .ld-phase {
+  display: none;
+}
+.comp-lead[data-variant="lead"] .ld-lead { display: block; }
+.comp-lead[data-variant="tldr"] .ld-tldr { display: block; }
+.comp-lead[data-variant="phase"] .ld-phase { display: block; }
+
 .comp-lead {
   background: transparent;
 }

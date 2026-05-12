@@ -67,6 +67,17 @@ export interface ThemeDef {
   borderSubtle?: string;
   /** 圆角 */
   radius?: string;
+  /**
+   * 段背景渐变（优先级高于 `background`）。
+   * 接受完整的 CSS `background` 值，例如：
+   *   - `linear-gradient(135deg, #FF4E4E 0%, #FF8C42 100%)`
+   *   - `radial-gradient(ellipse at top, #e63d3d, #c0392b)`
+   *
+   * 设置后会同时覆盖 body 背景（通过 `buildRootThemeCss`），
+   * 并在段容器上设置 `background-image`，让渐变贯穿整段。
+   * 组件内的卡片仍走 `--white` (surface token)，不受影响。
+   */
+  backgroundGradient?: string;
 
   // ===== 段样式 =====
   /**

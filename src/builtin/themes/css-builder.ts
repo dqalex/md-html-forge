@@ -59,6 +59,8 @@ function buildThemeVars(theme: ThemeDef): string[] {
 
   if (theme.border) vars.push(`--border: ${theme.border};`);
   if (theme.radius) vars.push(`--radius-panel: ${theme.radius};`);
+  // 渐变背景 token（组件可用 var(--bg-gradient) 引用）
+  if (theme.backgroundGradient) vars.push(`--bg-gradient: ${theme.backgroundGradient};`);
 
   // 字体
   if (theme.fontSerif) vars.push(`--serif: ${theme.fontSerif};`);
@@ -74,7 +76,13 @@ export function buildThemeCss(theme: ThemeDef, band: BandStyle = 'contained'): s
   const blockRules: string[] = [];
 
   // 段容器自身的背景/文字色
-  if (theme.background) blockRules.push(`background: ${theme.background};`);
+  if (theme.backgroundGradient) {
+    // 渐变优先：先设 background（兜底纯色），再叠 background-image（渐变）
+    if (theme.background) blockRules.push(`background: ${theme.background};`);
+    blockRules.push(`background-image: ${theme.backgroundGradient};`);
+  } else if (theme.background) {
+    blockRules.push(`background: ${theme.background};`);
+  }
   if (theme.text) blockRules.push(`color: ${theme.text};`);
 
   // 留白默认值：
@@ -139,7 +147,12 @@ export function buildRootThemeCss(theme: ThemeDef): string {
   const bodyRules: string[] = [];
 
   // body 基础色：背景 + 正文色
-  if (theme.background) bodyRules.push(`background: ${theme.background};`);
+  if (theme.backgroundGradient) {
+    if (theme.background) bodyRules.push(`background: ${theme.background};`);
+    bodyRules.push(`background-image: ${theme.backgroundGradient};`);
+  } else if (theme.background) {
+    bodyRules.push(`background: ${theme.background};`);
+  }
   if (theme.text) bodyRules.push(`color: ${theme.text};`);
   if (theme.fontSans) bodyRules.push(`font-family: ${theme.fontSans};`);
 

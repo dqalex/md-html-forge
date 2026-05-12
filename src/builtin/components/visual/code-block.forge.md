@@ -238,20 +238,21 @@ stepCode:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
+(function() {
+  document.querySelectorAll('.comp-code-block').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
 
   if (variant === 'diff') {
-    const diffEl = el.querySelector('[data-slot="diffContent"]');
+    var diffEl = el.querySelector('[data-slot="diffContent"]');
     if (diffEl && diffEl.textContent) {
-      const lines = diffEl.textContent.split('\n');
-      const rows = [];
-      for (const line of lines) {
-        const trimmed = line.trimStart();
-        let type = 'ctx';
-        let mark = ' ';
-        let content = trimmed;
-        let lnHtml = '';
+      var lines = diffEl.textContent.split('\n');
+      var rows = [];
+      for (var line of lines) {
+        var trimmed = line.trimStart();
+        var type = 'ctx';
+        var mark = ' ';
+        var content = trimmed;
+        var lnHtml = '';
 
         if (trimmed.startsWith('@@')) {
           type = 'hunk';
@@ -276,7 +277,7 @@ export function mount(el, api) {
           lnHtml = `<span class="ln"></span><span class="mark">${mark}</span>`;
         }
 
-        const escaped = content
+        var escaped = content
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;');
@@ -288,30 +289,30 @@ export function mount(el, api) {
   }
 
   if (variant === 'walkthrough') {
-    const hotEl = el.querySelector('[data-slot="stepHot"]');
+    var hotEl = el.querySelector('[data-slot="stepHot"]');
     if (hotEl) {
-      const isHot = /^hot|true|1|yes$/i.test((hotEl.textContent || '').trim());
+      var isHot = /^hot|true|1|yes$/i.test((hotEl.textContent || '').trim());
       if (isHot) {
-        const wtEl = el.querySelector('.cp-walkthrough');
+        var wtEl = el.querySelector('.cp-walkthrough');
         if (wtEl) wtEl.classList.add('hot');
       }
     }
     // 点击 badge 折叠/展开代码块（持久化）
-    const wtEl = el.querySelector('.cp-walkthrough');
-    const badge = el.querySelector('.cp-wt-badge');
-    const codeWrap = el.querySelector('.cp-wt-code-wrap');
+    var wtEl = el.querySelector('.cp-walkthrough');
+    var badge = el.querySelector('.cp-wt-badge');
+    var codeWrap = el.querySelector('.cp-wt-code-wrap');
     if (wtEl && badge && codeWrap) {
       badge.style.cursor = 'pointer';
       badge.setAttribute('role', 'button');
       badge.setAttribute('aria-label', '折叠/展开代码');
-      const apply = (collapsed) => {
+      var apply = function(collapsed) {
         codeWrap.style.display = collapsed ? 'none' : '';
         wtEl.classList.toggle('collapsed', collapsed);
       };
       apply(api.state.get('collapsed', false) === true);
-      badge.addEventListener('click', (e) => {
+      badge.addEventListener('click', function(e) {
         e.stopPropagation();
-        const next = !(api.state.get('collapsed', false) === true);
+        var next = !(api.state.get('collapsed', false) === true);
         api.state.set('collapsed', next);
         apply(next);
       });
@@ -321,26 +322,27 @@ export function mount(el, api) {
   // ===== 复制按钮（diff / walkthrough 共用） =====
   // 取 diff slot / stepCode slot 的纯文本作为复制源；优先用 forge.runtime.copy，
   // 失败时回退 execCommand。点击后 200ms 内显示"已复制"反馈。
-  const copyBtns = el.querySelectorAll('.cp-copy');
+  var copyBtns = el.querySelectorAll('.cp-copy');
   copyBtns.forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       e.preventDefault();
-      const target = btn.getAttribute('data-copy-target');
-      let text = '';
+      var target = btn.getAttribute('data-copy-target');
+      var text = '';
       if (target === 'diff') {
         // 取原始 diff 文本：用 slot 的 textContent（mount 已把 innerHTML 替换为 db-row 结构，
         // 此时 textContent 仍能拼出可读形式，但首选回到 slot 原文 → 在 mount 时缓存一份）
-        text = btn.__forgeRaw || (el.querySelector('[data-slot="diffContent"]')?.textContent || '');
+        var diffContentEl = el.querySelector('[data-slot="diffContent"]');
+        text = btn.__forgeRaw || (diffContentEl ? diffContentEl.textContent || '' : '');
       } else if (target === 'walkthrough') {
-        const codeEl = el.querySelector('[data-slot="stepCode"]');
+        var codeEl = el.querySelector('[data-slot="stepCode"]');
         // 优先 <code> 内容（去掉 fence），否则整段
-        const codeBlock = codeEl && codeEl.querySelector('code');
+        var codeBlock = codeEl && codeEl.querySelector('code');
         text = (codeBlock ? codeBlock.textContent : codeEl ? codeEl.textContent : '') || '';
       }
       if (!text) return;
-      const finish = function () {
-        const old = btn.textContent;
+      var finish = function () {
+        var old = btn.textContent;
         btn.classList.add('copied');
         btn.textContent = '已复制';
         setTimeout(function () {
@@ -348,7 +350,7 @@ export function mount(el, api) {
           btn.textContent = old || '复制';
         }, 1200);
       };
-      const rt = (window.forge && window.forge.runtime) || null;
+      var rt = (window.forge && window.forge.runtime) || null;
       if (rt && rt.copy) {
         Promise.resolve(rt.copy(text)).then(finish, finish);
       } else if (navigator.clipboard) {
@@ -362,16 +364,18 @@ export function mount(el, api) {
   // 缓存 diff 原文：mount 把 diffContent 转成 db-row 结构后，原始 textContent 不再是 diff 文本
   // 这里在 mount 头部就快照一次（diff 分支已先 set innerHTML，所以提前在变量取）
   if (variant === 'diff') {
-    const btn = el.querySelector('.cp-copy[data-copy-target="diff"]');
-    const diffEl = el.querySelector('[data-slot="diffContent"]');
+    var btn = el.querySelector('.cp-copy[data-copy-target="diff"]');
+    var diffEl = el.querySelector('[data-slot="diffContent"]');
     if (btn && diffEl) {
       // mount 已经替换 innerHTML 了；从 db-row 反推
-      const rows = diffEl.querySelectorAll('.db-row');
+      var rows = diffEl.querySelectorAll('.db-row');
       if (rows.length) {
-        const lines = [];
+        var lines = [];
         rows.forEach(function (r) {
-          const mark = (r.querySelector('.mark')?.textContent || '').trim();
-          const code = r.querySelector('.code')?.textContent || '';
+          var markEl = r.querySelector('.mark');
+          var codeEl2 = r.querySelector('.code');
+          var mark = markEl ? (markEl.textContent || '').trim() : '';
+          var code = codeEl2 ? (codeEl2.textContent || '') : '';
           if (r.classList.contains('hunk')) lines.push(code);
           else lines.push((mark || ' ') + code);
         });
@@ -379,7 +383,8 @@ export function mount(el, api) {
       }
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample

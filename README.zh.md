@@ -55,7 +55,7 @@ HTML 注释，所以**即使没有 forge 工具链，这份文档在任何编辑
    内部我就搭了一套。
 2. **另一个内部项目**：同样的问题再次出现。我正在迭代这条渲染管线的时候……
 3. 刷到 Thariq Shihipar 那篇
-   [《Using Claude Code: The Unreasonable Effectiveness of HTML》](https://simonwillison.net/2026/May/9/thariq/)，
+   [《Using Claude Code: The Unreasonable Effectiveness of HTML》](https://x.com/trq212/status/2052809885763747935)，
    以及他的 [html-effectiveness](https://github.com/ThariqS/html-effectiveness)
    仓库。角度不同（他谈的是 agent 输出格式），但核心论点一样：**HTML 才是更合适的
    输出目标**。

@@ -59,7 +59,7 @@ That conviction led me down this road twice already:
 2. **A different internal project** — same problem reappeared. I was mid-way
    through iterating that rendering pipeline when…
 3. I ran into Thariq Shihipar's post ["Using Claude Code: The Unreasonable
-   Effectiveness of HTML"](https://simonwillison.net/2026/May/9/thariq/) (also
+   Effectiveness of HTML"](https://x.com/trq212/status/2052809885763747935) (also
    the [html-effectiveness](https://github.com/ThariqS/html-effectiveness)
    repo). Different angle — his is about agent output formats — but the core
    thesis is identical: **HTML is the right target**.

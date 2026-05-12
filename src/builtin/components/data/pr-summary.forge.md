@@ -103,6 +103,14 @@ keyFiles:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的 pane ===== */
+.comp-pr-summary .ps-standard,
+.comp-pr-summary .ps-keyfiles {
+  display: none;
+}
+.comp-pr-summary[data-variant="standard"] .ps-standard { display: block; }
+.comp-pr-summary[data-variant="keyfiles"] .ps-keyfiles { display: block; }
+
 .comp-pr-summary {
   background: transparent;
 }
@@ -241,47 +249,50 @@ keyFiles:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
+(function() {
+  document.querySelectorAll('.comp-pr-summary').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
 
   // 判断 slot 是否真正有用户填充值（占位元素永远在 DOM 里，textContent 才是真相）
-  const has = (slotEl) => !!(slotEl && (slotEl.textContent || '').trim());
+  var has = (slotEl) => !!(slotEl && (slotEl.textContent || '').trim());
 
   if (variant === 'standard') {
-    const authorEl = el.querySelector('[data-slot="prAuthor"]');
-    const authorSubEl = el.querySelector('[data-slot="prAuthorSub"]');
-    const avatarEl = el.querySelector('[data-slot="prAuthorInitials"]');
-    const authorWrap = el.querySelector('.ps-author');
+    var authorEl = el.querySelector('[data-slot="prAuthor"]');
+    var authorSubEl = el.querySelector('[data-slot="prAuthorSub"]');
+    var avatarEl = el.querySelector('[data-slot="prAuthorInitials"]');
+    var authorWrap = el.querySelector('.ps-author');
 
     if (!has(authorEl) && !has(authorSubEl) && !has(avatarEl)) {
-      authorWrap?.remove();
+      if (authorWrap) authorWrap.remove();
     } else if (!has(avatarEl)) {
-      avatarEl?.remove();
+      if (avatarEl) avatarEl.remove();
     }
 
-    const branchEl = el.querySelector('[data-slot="prBranch"]');
+    var branchEl = el.querySelector('[data-slot="prBranch"]');
     if (!has(branchEl)) {
-      el.querySelector('.ps-branch')?.remove();
+      var branchWrap = el.querySelector('.ps-branch');
+      if (branchWrap) branchWrap.remove();
     }
 
-    const addedEl = el.querySelector('[data-slot="prAdded"]');
-    const deletedEl = el.querySelector('[data-slot="prDeleted"]');
-    const filesEl = el.querySelector('[data-slot="prFiles"]');
-    const statWrap = el.querySelector('.ps-stat');
+    var addedEl = el.querySelector('[data-slot="prAdded"]');
+    var deletedEl = el.querySelector('[data-slot="prDeleted"]');
+    var filesEl = el.querySelector('[data-slot="prFiles"]');
+    var statWrap = el.querySelector('.ps-stat');
 
     if (!has(addedEl) && !has(deletedEl) && !has(filesEl)) {
-      statWrap?.remove();
+      (statWrap && statWrap.remove)();
     } else {
-      const sep = statWrap?.querySelector('.sep');
+      var sep = (statWrap && statWrap.querySelector)('.sep');
       if (!has(addedEl) || !has(deletedEl)) {
-        sep?.remove();
+        (sep && sep.remove)();
       }
-      if (!has(addedEl)) addedEl?.remove();
-      if (!has(deletedEl)) deletedEl?.remove();
-      if (!has(filesEl)) filesEl?.remove();
+      if (!has(addedEl)) (addedEl && addedEl.remove)();
+      if (!has(deletedEl)) (deletedEl && deletedEl.remove)();
+      if (!has(filesEl)) (filesEl && filesEl.remove)();
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample

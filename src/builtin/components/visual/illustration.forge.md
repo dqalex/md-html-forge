@@ -71,6 +71,14 @@ notesBody:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的 pane ===== */
+.comp-illustration .il-frame,
+.comp-illustration .il-notes {
+  display: none;
+}
+.comp-illustration[data-variant="frame"] .il-frame { display: block; }
+.comp-illustration[data-variant="notes"] .il-notes { display: block; }
+
 .comp-illustration {
   background: transparent;
 }

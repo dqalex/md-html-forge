@@ -316,10 +316,11 @@ tableData:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant') || 'standard';
+(function() {
+  document.querySelectorAll('.comp-table').forEach(function(el) {
+  var variant = el.getAttribute('data-variant') || 'standard';
 
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+  var esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
@@ -328,15 +329,15 @@ export function mount(el, api) {
   // 排序方式：先尝试解析为数字，否则按字符串本地化比较
   function bindTableSort(tableEl, key) {
     if (!tableEl) return;
-    const thead = tableEl.querySelector('thead') || tableEl;
-    const ths = thead.querySelectorAll('th');
+    var thead = tableEl.querySelector('thead') || tableEl;
+    var ths = thead.querySelectorAll('th');
     if (!ths.length) return;
-    const tbody = tableEl.querySelector('tbody') || tableEl;
+    var tbody = tableEl.querySelector('tbody') || tableEl;
     // 缓存原始顺序，便于第三次点击恢复
-    const originalRows = Array.from(tbody.querySelectorAll('tr'));
+    var originalRows = Array.from(tbody.querySelectorAll('tr'));
 
-    const apply = (col, dir) => {
-      ths.forEach((th, i) => {
+    var apply = function(col, dir) {
+      ths.forEachfunction((th, i) {
         th.classList.toggle('sort-asc', i === col && dir === 'asc');
         th.classList.toggle('sort-desc', i === col && dir === 'desc');
       });
@@ -344,20 +345,20 @@ export function mount(el, api) {
         originalRows.forEach((r) => tbody.appendChild(r));
         return;
       }
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const getCell = (tr) => {
-        const cells = tr.querySelectorAll('td, th');
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      var getCell = function(tr) {
+        var cells = tr.querySelectorAll('td, th');
         return cells[col] ? (cells[col].textContent || '').trim() : '';
       };
-      const tryNum = (v) => {
-        const m = v.replace(/[,_\s]/g, '').match(/^-?\d+(\.\d+)?$/);
+      var tryNum = function(v) {
+        var m = v.replace(/[,_\s]/g, '').match(/^-?\d+(\.\d+)?$/);
         return m ? parseFloat(v.replace(/[,_\s]/g, '')) : null;
       };
-      rows.sort((a, b) => {
-        const av = getCell(a);
-        const bv = getCell(b);
-        const an = tryNum(av), bn = tryNum(bv);
-        let cmp;
+      rows.sortfunction((a, b) {
+        var av = getCell(a);
+        var bv = getCell(b);
+        var an = tryNum(av), bn = tryNum(bv);
+        var cmp;
         if (an !== null && bn !== null) cmp = an - bn;
         else cmp = av.localeCompare(bv, undefined, { numeric: true, sensitivity: 'base' });
         return dir === 'asc' ? cmp : -cmp;
@@ -366,20 +367,20 @@ export function mount(el, api) {
     };
 
     // 恢复持久化的排序
-    const saved = api.state.get('sort:' + key, null);
+    var saved = api.state.get('sort:' + key, null);
     if (saved && typeof saved.col === 'number' && saved.dir) apply(saved.col, saved.dir);
 
-    ths.forEach((th, i) => {
+    ths.forEachfunction((th, i) {
       th.style.cursor = 'pointer';
       th.setAttribute('data-no-jump', '1');
-      th.addEventListener('click', (e) => {
+      th.addEventListener('click', function(e) {
         e.stopPropagation();
         // 三态：none → asc → desc → none
-        const cur = api.state.get('sort:' + key, { col: -1, dir: 'none' });
-        let nextDir = 'asc';
+        var cur = api.state.get('sort:' + key, { col: -1, dir: 'none' });
+        var nextDir = 'asc';
         if (cur.col === i && cur.dir === 'asc') nextDir = 'desc';
         else if (cur.col === i && cur.dir === 'desc') nextDir = 'none';
-        const next = nextDir === 'none' ? { col: -1, dir: 'none' } : { col: i, dir: nextDir };
+        var next = nextDir === 'none' ? { col: -1, dir: 'none' } : { col: i, dir: nextDir };
         api.state.set('sort:' + key, next);
         apply(next.col, next.dir);
       });
@@ -388,57 +389,57 @@ export function mount(el, api) {
 
   if (variant === 'standard') {
     // 给 markdown 渲染出来的 table 加排序
-    const tableEl = el.querySelector('.table-content table');
+    var tableEl = el.querySelector('.table-content table');
     bindTableSort(tableEl, 'standard');
     return;
   }
 
-  const dataEl = el.querySelector('[data-slot="tableData"]');
+  var dataEl = el.querySelector('[data-slot="tableData"]');
   if (!dataEl) return;
 
-  const raw = (dataEl.textContent || '').trim();
+  var raw = (dataEl.textContent || '').trim();
   if (!raw) return;
 
-  const rows = raw.split('\n').map((s) => s.trim()).filter(Boolean);
+  var rows = raw.split('\n').map((s) => s.trim()).filter(Boolean);
 
   if (variant === 'risk') {
     // 每行 描述|严重度|缓解 → 保留 .rt-row 网格结构
-    const sevClass = (s) => {
-      const k = s.toLowerCase();
+    var sevClass = function(s) {
+      var k = s.toLowerCase();
       if (k.startsWith('h')) return 'high';
       if (k.startsWith('m')) return 'med';
       return 'low';
     };
-    const headHtml = '<div class="rt-row rt-head"><div class="rt-cell" data-rt-col="0">Risk</div><div class="rt-cell" data-rt-col="1">Severity</div><div class="rt-cell" data-rt-col="2">Mitigation</div></div>';
-    const cellsList = rows.map((r) => r.split('|').map((s) => s.trim()));
-    const renderBody = (list) => list.map((cells) => {
-      const desc = cells[0] || '';
-      const sev = cells[1] || '';
-      const miti = cells[2] || '';
+    var headHtml = '<div class="rt-row rt-head"><div class="rt-cell" data-rt-col="0">Risk</div><div class="rt-cell" data-rt-col="1">Severity</div><div class="rt-cell" data-rt-col="2">Mitigation</div></div>';
+    var cellsList = rows.map((r) => r.split('|').map((s) => s.trim()));
+    var renderBody = (list) => list.mapfunction((cells) {
+      var desc = cells[0] || '';
+      var sev = cells[1] || '';
+      var miti = cells[2] || '';
       return `<div class="rt-row" data-rt-data='${esc(JSON.stringify(cells))}'><div class="rt-cell">${esc(desc)}</div><div class="rt-cell"><span class="rt-sev ${sevClass(sev)}">${esc(sev)}</span></div><div class="rt-cell">${esc(miti)}</div></div>`;
     }).join('');
     dataEl.innerHTML = headHtml + renderBody(cellsList);
 
     // 让 head cell 可点排序：复用 cellsList 重排
-    const sevOrder = (s) => {
-      const k = (s || '').toLowerCase();
+    var sevOrder = function(s) {
+      var k = (s || '').toLowerCase();
       if (k.startsWith('h')) return 3;
       if (k.startsWith('m')) return 2;
       if (k.startsWith('l')) return 1;
       return 0;
     };
-    const sortKey = 'sort:risk';
-    const apply = (col, dir) => {
-      dataEl.querySelectorAll('.rt-head .rt-cell').forEach((c, i) => {
+    var sortKey = 'sort:risk';
+    var apply = function(col, dir) {
+      dataEl.querySelectorAll('.rt-head .rt-cell').forEachfunction((c, i) {
         c.classList.toggle('sort-asc', i === col && dir === 'asc');
         c.classList.toggle('sort-desc', i === col && dir === 'desc');
       });
       // 移除旧 body
       dataEl.querySelectorAll('.rt-row:not(.rt-head)').forEach((r) => r.remove());
-      const list = cellsList.slice();
+      var list = cellsList.slice();
       if (col != null && dir !== 'none') {
-        list.sort((a, b) => {
-          let cmp;
+        list.sortfunction((a, b) {
+          var cmp;
           if (col === 1) cmp = sevOrder(a[1]) - sevOrder(b[1]);
           else cmp = (a[col] || '').localeCompare(b[col] || '', undefined, { numeric: true, sensitivity: 'base' });
           return dir === 'asc' ? cmp : -cmp;
@@ -446,18 +447,18 @@ export function mount(el, api) {
       }
       dataEl.insertAdjacentHTML('beforeend', renderBody(list));
     };
-    const saved = api.state.get(sortKey, null);
+    var saved = api.state.get(sortKey, null);
     if (saved && typeof saved.col === 'number' && saved.dir) apply(saved.col, saved.dir);
-    dataEl.querySelectorAll('.rt-head .rt-cell').forEach((cell, i) => {
+    dataEl.querySelectorAll('.rt-head .rt-cell').forEachfunction((cell, i) {
       cell.style.cursor = 'pointer';
       cell.setAttribute('data-no-jump', '1');
-      cell.addEventListener('click', (e) => {
+      cell.addEventListener('click', function(e) {
         e.stopPropagation();
-        const cur = api.state.get(sortKey, { col: -1, dir: 'none' });
-        let nextDir = 'asc';
+        var cur = api.state.get(sortKey, { col: -1, dir: 'none' });
+        var nextDir = 'asc';
         if (cur.col === i && cur.dir === 'asc') nextDir = 'desc';
         else if (cur.col === i && cur.dir === 'desc') nextDir = 'none';
-        const next = nextDir === 'none' ? { col: -1, dir: 'none' } : { col: i, dir: nextDir };
+        var next = nextDir === 'none' ? { col: -1, dir: 'none' } : { col: i, dir: nextDir };
         api.state.set(sortKey, next);
         apply(next.col, next.dir);
       });
@@ -467,8 +468,8 @@ export function mount(el, api) {
 
   if (variant === 'impact') {
     // 每行 key|value，渲染为 <table><tr><th>k</th><td>v</td></tr>
-    const trs = rows.map((r) => {
-      const [k = '', v = ''] = r.split('|').map((s) => s.trim());
+    var trs = rows.mapfunction((r) {
+      var [k = '', v = ''] = r.split('|').map((s) => s.trim());
       return `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`;
     }).join('');
     dataEl.innerHTML = `<table><tbody>${trs}</tbody></table>`;
@@ -477,12 +478,12 @@ export function mount(el, api) {
 
   if (variant === 'flag') {
     // 每行 key|描述|rollout|requires|state
-    const html = rows.map((r) => {
-      const [key = '', desc = '', rollout = '', requires = '', state = 'off'] = r.split('|').map((s) => s.trim());
-      const stateClass = state.toLowerCase() === 'on' ? 'on' : 'off';
-      const warnClass = (state.toLowerCase() === 'warn' || requires) ? 'warn' : '';
-      const reqHtml = requires ? `<span class="fr-req">requires <code>${esc(requires)}</code></span>` : '';
-      const rolloutHtml = rollout ? `<span class="fr-rollout">${esc(rollout)}%</span>` : '';
+    var html = rows.mapfunction((r) {
+      var [key = '', desc = '', rollout = '', requires = '', state = 'off'] = r.split('|').map((s) => s.trim());
+      var stateClass = state.toLowerCase() === 'on' ? 'on' : 'off';
+      var warnClass = (state.toLowerCase() === 'warn' || requires) ? 'warn' : '';
+      var reqHtml = requires ? `<span class="fr-req">requires <code>${esc(requires)}</code></span>` : '';
+      var rolloutHtml = rollout ? `<span class="fr-rollout">${esc(rollout)}%</span>` : '';
       return `<div class="fr-row ${warnClass}">
         <div class="fr-toggle ${stateClass}" role="switch" aria-checked="${stateClass === 'on'}" data-flag-key="${esc(key)}"></div>
         <div class="fr-info">
@@ -494,17 +495,17 @@ export function mount(el, api) {
     }).join('');
     dataEl.innerHTML = html;
     // flag 变体 toggle：点击 .fr-toggle 切换状态（持久化），并 emit 事件
-    dataEl.querySelectorAll('.fr-toggle').forEach((tg) => {
+    dataEl.querySelectorAll('.fr-toggle').forEachfunction((tg) {
       tg.style.cursor = 'pointer';
       tg.setAttribute('data-no-jump', '1');
-      const key = tg.getAttribute('data-flag-key') || '';
-      const stateKey = 'flag:' + key;
-      const saved = api.state.get(stateKey, null);
+      var key = tg.getAttribute('data-flag-key') || '';
+      var stateKey = 'flag:' + key;
+      var saved = api.state.get(stateKey, null);
       if (saved === 'on') { tg.classList.remove('off'); tg.classList.add('on'); tg.setAttribute('aria-checked', 'true'); }
       else if (saved === 'off') { tg.classList.remove('on'); tg.classList.add('off'); tg.setAttribute('aria-checked', 'false'); }
-      tg.addEventListener('click', (e) => {
+      tg.addEventListener('click', function(e) {
         e.stopPropagation();
-        const nowOn = tg.classList.contains('on');
+        var nowOn = tg.classList.contains('on');
         if (nowOn) { tg.classList.remove('on'); tg.classList.add('off'); tg.setAttribute('aria-checked', 'false'); api.state.set(stateKey, 'off'); }
         else { tg.classList.remove('off'); tg.classList.add('on'); tg.setAttribute('aria-checked', 'true'); api.state.set(stateKey, 'on'); }
         api.emit('flag-toggle', { key: key, on: !nowOn });
@@ -512,7 +513,8 @@ export function mount(el, api) {
     });
     return;
   }
-}
+  });
+})();
 ```
 
 ## Sample

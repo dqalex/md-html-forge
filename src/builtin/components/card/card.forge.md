@@ -132,6 +132,18 @@ ticketOwner:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的 pane ===== */
+.comp-card .card-standard,
+.comp-card .card-stat,
+.comp-card .card-decision,
+.comp-card .card-ticket {
+  display: none;
+}
+.comp-card[data-variant="standard"] .card-standard { display: block; }
+.comp-card[data-variant="stat"] .card-stat { display: block; }
+.comp-card[data-variant="decision"] .card-decision { display: block; }
+.comp-card[data-variant="ticket"] .card-ticket { display: block; }
+
 .comp-card {
   background: var(--white);
   border: var(--border);
@@ -306,22 +318,23 @@ ticketOwner:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+(function() {
+  document.querySelectorAll('.comp-card').forEach(function(el) {
+  var esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
   // standard variant: cardLink (a 标签) — 把内容当 href，cardLinkText 显示文字
-  const cardLink = el.querySelector('a[data-slot="cardLink"]');
+  var cardLink = el.querySelector('a[data-slot="cardLink"]');
   if (cardLink) {
-    const href = (cardLink.getAttribute('data-href') || cardLink.textContent || '').trim();
-    const inner = cardLink.querySelector('[data-slot="cardLinkText"]');
-    const linkText = (inner?.textContent || '').trim();
+    var href = (cardLink.getAttribute('data-href') || cardLink.textContent || '').trim();
+    var inner = cardLink.querySelector('[data-slot="cardLinkText"]');
+    var linkText = ((inner && inner.textContent) || '').trim();
     if (href) {
       // textContent 把整个 a 包括内嵌 span 的 textContent 都包含了，所以要清理：
       // 当 cardLinkText 有值时，外层 cardLink 的 textContent 实际等于 href + linkText。
       // 我们用 cardLinkText 的内容做最终展示，没填则回退到 href。
-      const display = linkText || href;
+      var display = linkText || href;
       cardLink.setAttribute('href', href);
       cardLink.textContent = display;
     } else {
@@ -330,37 +343,38 @@ export function mount(el, api) {
   }
 
   // decision variant: parse options chips
-  const decisionOptions = el.querySelector('[data-slot="decisionOptions"]');
+  var decisionOptions = el.querySelector('[data-slot="decisionOptions"]');
   if (decisionOptions) {
-    const raw = decisionOptions.textContent || '';
+    var raw = decisionOptions.textContent || '';
     if (raw) {
-      const options = raw.split(',').map(o => o.trim()).filter(Boolean);
-      decisionOptions.innerHTML = options.map(opt => {
-        const isLean = opt.startsWith('*');
-        const label = isLean ? opt.slice(1).trim() : opt;
+      var options = raw.split(',').map(o => o.trim()).filter(Boolean);
+      decisionOptions.innerHTML = options.map(function(opt) {
+        var isLean = opt.startsWith('*');
+        var label = isLean ? opt.slice(1).trim() : opt;
         return `<span class="cd-chip${isLean ? ' lean' : ''}">${esc(label)}</span>`;
       }).join('');
     }
   }
 
   // ticket variant: tag class mapping
-  const ticketTag = el.querySelector('[data-slot="ticketTag"]');
+  var ticketTag = el.querySelector('[data-slot="ticketTag"]');
   if (ticketTag) {
-    const tag = (ticketTag.textContent || '').trim().toLowerCase();
+    var tag = (ticketTag.textContent || '').trim().toLowerCase();
     if (['bug', 'feat', 'chore', 'debt'].includes(tag)) {
       ticketTag.classList.add('tag-' + tag);
     }
   }
 
   // stat variant: accent border（statAccent 是隐藏 span，只读取值用作 className）
-  const statAccent = el.querySelector('[data-slot="statAccent"]');
+  var statAccent = el.querySelector('[data-slot="statAccent"]');
   if (statAccent) {
-    const accent = (statAccent.textContent || '').trim().toLowerCase();
+    var accent = (statAccent.textContent || '').trim().toLowerCase();
     if (accent === 'warn') {
       el.classList.add('accent-warn');
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample

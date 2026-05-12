@@ -128,6 +128,18 @@ specContent:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的 pane ===== */
+.comp-design-spec .ds-swatch,
+.comp-design-spec .ds-spacing,
+.comp-design-spec .ds-radius,
+.comp-design-spec .ds-keyframe {
+  display: none;
+}
+.comp-design-spec[data-variant="swatch"] .ds-swatch { display: block; }
+.comp-design-spec[data-variant="spacing"] .ds-spacing { display: block; }
+.comp-design-spec[data-variant="radius"] .ds-radius { display: block; }
+.comp-design-spec[data-variant="keyframe"] .ds-keyframe { display: block; }
+
 .comp-design-spec {
   background: transparent;
 }
@@ -297,20 +309,21 @@ specContent:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
+(function() {
+  document.querySelectorAll('.comp-design-spec').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
 
   if (variant === 'swatch') {
-    const chip = el.querySelector('[data-slot="swatchColor"]');
-    const borderSlot = el.querySelector('[data-slot="swatchBorder"]');
+    var chip = el.querySelector('[data-slot="swatchColor"]');
+    var borderSlot = el.querySelector('[data-slot="swatchBorder"]');
     if (chip) {
-      const color = (chip.textContent || '').trim();
+      var color = (chip.textContent || '').trim();
       if (color) {
         chip.style.background = color;
       }
     }
     if (borderSlot) {
-      const val = (borderSlot.textContent || '').trim().toLowerCase();
+      var val = (borderSlot.textContent || '').trim().toLowerCase();
       if (/^(no|false|0|hide)$/.test(val)) {
         if (chip) chip.classList.add('no-border');
       }
@@ -318,18 +331,18 @@ export function mount(el, api) {
   }
 
   if (variant === 'spacing') {
-    const sizeSlot = el.querySelector('[data-slot="spSize"]');
-    const tokenSlot = el.querySelector('[data-slot="spToken"]');
-    const sizes = (sizeSlot ? sizeSlot.textContent : '').split(',').map(function(v) { return v.trim(); }).filter(Boolean);
-    const tokens = (tokenSlot ? tokenSlot.textContent : '').split(',').map(function(v) { return v.trim(); }).filter(Boolean);
-    const container = el.querySelector('.ds-spacing');
+    var sizeSlot = el.querySelector('[data-slot="spSize"]');
+    var tokenSlot = el.querySelector('[data-slot="spToken"]');
+    var sizes = (sizeSlot ? sizeSlot.textContent : '').split(',').map(function(v) { return v.trim(); }).filter(Boolean);
+    var tokens = (tokenSlot ? tokenSlot.textContent : '').split(',').map(function(v) { return v.trim(); }).filter(Boolean);
+    var container = el.querySelector('.ds-spacing');
     if (!container) return;
     container.innerHTML = '';
-    const maxLen = Math.max(sizes.length, tokens.length);
-    for (let i = 0; i < maxLen; i++) {
-      const size = sizes[i] || '';
-      const token = tokens[i] || '';
-      const item = document.createElement('div');
+    var maxLen = Math.max(sizes.length, tokens.length);
+    for (var i = 0; i < maxLen; i++) {
+      var size = sizes[i] || '';
+      var token = tokens[i] || '';
+      var item = document.createElement('div');
       item.className = 'ds-spacing-item';
       item.innerHTML = '<div class="ds-spacing-bar" style="width:' + size + 'px"></div><div class="ds-spacing-label">' + size + (token ? '<span>' + token + '</span>' : '') + '</div>';
       container.appendChild(item);
@@ -337,38 +350,39 @@ export function mount(el, api) {
   }
 
   if (variant === 'radius') {
-    const typeSlot = el.querySelector('[data-slot="rsType"]');
-    const valueSlot = el.querySelector('[data-slot="rsValue"]');
-    const radiusEl = el.querySelector('.ds-radius');
+    var typeSlot = el.querySelector('[data-slot="rsType"]');
+    var valueSlot = el.querySelector('[data-slot="rsValue"]');
+    var radiusEl = el.querySelector('.ds-radius');
     if (!radiusEl || !valueSlot) return;
-    const isShadow = /^(shadow)$/i.test((typeSlot ? typeSlot.textContent : '').trim());
+    var isShadow = /^(shadow)$/i.test((typeSlot ? typeSlot.textContent : '').trim());
     radiusEl.classList.add(isShadow ? 'is-shadow' : 'is-radius');
-    const val = (valueSlot.textContent || '').trim();
+    var val = (valueSlot.textContent || '').trim();
     if (val) {
       radiusEl.style[isShadow ? 'boxShadow' : 'borderRadius'] = val;
     }
   }
 
   if (variant === 'keyframe') {
-    const dataSlot = el.querySelector('[data-slot="keyframes"]');
-    const track = el.querySelector('.ds-kf-track');
+    var dataSlot = el.querySelector('[data-slot="keyframes"]');
+    var track = el.querySelector('.ds-kf-track');
     if (!dataSlot || !track) return;
-    const entries = (dataSlot.textContent || '').split(';').map(function(e) { return e.trim(); }).filter(Boolean);
+    var entries = (dataSlot.textContent || '').split(';').map(function(e) { return e.trim(); }).filter(Boolean);
     track.innerHTML = '';
     entries.forEach(function(entry, idx) {
-      const parts = entry.split('|').map(function(p) { return p.trim(); });
-      const label = parts[0] || '';
-      const time = parts[1] || '';
-      const pos = parts[2] || '0';
-      const isLast = idx === entries.length - 1;
-      const key = document.createElement('div');
+      var parts = entry.split('|').map(function(p) { return p.trim(); });
+      var label = parts[0] || '';
+      var time = parts[1] || '';
+      var pos = parts[2] || '0';
+      var isLast = idx === entries.length - 1;
+      var key = document.createElement('div');
       key.className = 'ds-kf-key' + (isLast ? ' is-last' : '');
       key.style.left = pos + '%';
       key.innerHTML = '<em class="ds-kf-label">' + label + '</em><span class="ds-kf-time">' + time + '</span>';
       track.appendChild(key);
     });
   }
-}
+  });
+})();
 ```
 
 ## Sample

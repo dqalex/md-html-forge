@@ -173,25 +173,27 @@ panelData:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant') || 'snippet';
+(function() {
+  document.querySelectorAll('.comp-panel').forEach(function(el) {
+  var variant = el.getAttribute('data-variant') || 'snippet';
   if (variant !== 'glossary') return;
 
-  const dl = el.querySelector('[data-slot="panelData"]');
+  var dl = el.querySelector('[data-slot="panelData"]');
   if (!dl) return;
-  const raw = (dl.textContent || '').trim();
+  var raw = (dl.textContent || '').trim();
   if (!raw) return;
 
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+  var esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
-  const html = raw.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
-    const [term = '', def = ''] = line.split('|').map((s) => s.trim());
+  var html = raw.split('\n').map((line) => line.trim()).filter(Boolean).mapfunction((line) {
+    var [term = '', def = ''] = line.split('|').map((s) => s.trim());
     return `<dt>${esc(term)}</dt><dd>${esc(def)}</dd>`;
   }).join('');
   dl.innerHTML = html;
-}
+  });
+})();
 ```
 
 ## Sample

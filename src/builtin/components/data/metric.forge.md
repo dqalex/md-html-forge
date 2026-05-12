@@ -85,6 +85,16 @@ metricTrend:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的 pane ===== */
+.comp-metric .mc-band,
+.comp-metric .mc-hero,
+.comp-metric .mc-slide {
+  display: none;
+}
+.comp-metric[data-variant="band"] .mc-band { display: block; }
+.comp-metric[data-variant="hero"] .mc-hero { display: block; }
+.comp-metric[data-variant="slide"] .mc-slide { display: block; }
+
 .comp-metric {
   background: transparent;
 }
@@ -189,45 +199,46 @@ metricTrend:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
+(function() {
+  document.querySelectorAll('.comp-metric').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
 
   if (variant === 'band' || variant === 'hero') {
-    const valueSlot = el.querySelector('[data-slot="metricValue"]');
-    const labelSlot = el.querySelector('[data-slot="metricLabel"]');
-    const deltaSlot = el.querySelector('[data-slot="metricDelta"]');
+    var valueSlot = el.querySelector('[data-slot="metricValue"]');
+    var labelSlot = el.querySelector('[data-slot="metricLabel"]');
+    var deltaSlot = el.querySelector('[data-slot="metricDelta"]');
 
-    const values = (valueSlot?.textContent || '').split('\n').map(v => v.trim()).filter(Boolean);
-    const labels = (labelSlot?.textContent || '').split('\n').map(v => v.trim()).filter(Boolean);
-    const deltas = (deltaSlot?.textContent || '').split('\n').map(v => v.trim()).filter(Boolean);
-    const count = Math.max(values.length, labels.length, deltas.length);
+    var values = ((valueSlot && valueSlot.textContent) || '').split('\n').map(v => v.trim()).filter(Boolean);
+    var labels = ((labelSlot && labelSlot.textContent) || '').split('\n').map(v => v.trim()).filter(Boolean);
+    var deltas = ((deltaSlot && deltaSlot.textContent) || '').split('\n').map(v => v.trim()).filter(Boolean);
+    var count = Math.max(values.length, labels.length, deltas.length);
 
     if (count === 0) return;
 
-    const container = variant === 'band'
+    var container = variant === 'band'
       ? el.querySelector('.mc-band')
       : el.querySelector('.mc-hero');
     if (!container) return;
 
     container.innerHTML = '';
-    for (let i = 0; i < count; i++) {
-      const cardClass = variant === 'band' ? 'mc-card' : 'mc-hitem';
-      const card = document.createElement('div');
+    for (var i = 0; i < count; i++) {
+      var cardClass = variant === 'band' ? 'mc-card' : 'mc-hitem';
+      var card = document.createElement('div');
       card.className = cardClass;
       if (values[i]) {
-        const num = document.createElement('div');
+        var num = document.createElement('div');
         num.className = 'mc-num';
         num.textContent = values[i];
         card.appendChild(num);
       }
       if (labels[i]) {
-        const lbl = document.createElement('div');
+        var lbl = document.createElement('div');
         lbl.className = 'mc-label';
         lbl.textContent = labels[i];
         card.appendChild(lbl);
       }
       if (deltas[i]) {
-        const dlt = document.createElement('div');
+        var dlt = document.createElement('div');
         dlt.className = 'mc-delta';
         dlt.textContent = deltas[i];
         card.appendChild(dlt);
@@ -237,16 +248,18 @@ export function mount(el, api) {
   }
 
   if (variant === 'slide') {
-    const deltaEl = el.querySelector('.mc-sdelta');
-    const trend = (api.slots?.metricTrend || '').trim().toLowerCase();
+    var deltaEl = el.querySelector('.mc-sdelta');
+    var trendEl = el.querySelector('[data-slot="metricTrend"]');
+    var trend = trendEl ? (trendEl.textContent || '').trim().toLowerCase() : '';
     if (trend && deltaEl) {
-      const isUp = /^(up|positive|\+)/i.test(trend);
+      var isUp = /^(up|positive|\+)/i.test(trend);
       if (isUp) {
         deltaEl.classList.add('up');
       }
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample

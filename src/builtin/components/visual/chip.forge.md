@@ -213,18 +213,19 @@ legendItems:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+(function() {
+  document.querySelectorAll('.comp-chip').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
+  var esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
   if (variant === 'risk') {
-    const riskEl = el.querySelector('[data-slot="riskLevel"]');
-    const chipEl = el.querySelector('.cp-risk');
+    var riskEl = el.querySelector('[data-slot="riskLevel"]');
+    var chipEl = el.querySelector('.cp-risk');
     if (riskEl && chipEl) {
-      const risk = (riskEl.textContent || '').trim().toLowerCase();
-      const valid = ['safe', 'medium', 'attention'];
+      var risk = (riskEl.textContent || '').trim().toLowerCase();
+      var valid = ['safe', 'medium', 'attention'];
       if (valid.includes(risk)) {
         chipEl.classList.add(risk);
       }
@@ -234,38 +235,39 @@ export function mount(el, api) {
       chipEl.setAttribute('role', 'button');
       chipEl.setAttribute('tabindex', '0');
       chipEl.setAttribute('data-no-jump', '1');
-      const active = api.state.get('active', false) === true;
+      var active = api.state.get('active', false) === true;
       chipEl.classList.toggle('active', active);
-      chipEl.addEventListener('click', (e) => {
+      chipEl.addEventListener('click', function(e) {
         e.stopPropagation();
-        const next = !chipEl.classList.contains('active');
+        var next = !chipEl.classList.contains('active');
         chipEl.classList.toggle('active', next);
         api.state.set('active', next);
-        api.emit('chip-toggle', { active: next, label: (el.querySelector('[data-slot="riskLabel"]')?.textContent || '').trim() });
+        var riskLabelEl = el.querySelector('[data-slot="riskLabel"]');
+        api.emit('chip-toggle', { active: next, label: riskLabelEl ? (riskLabelEl.textContent || '').trim() : '' });
       });
     }
   }
 
   if (variant === 'incident') {
-    const typeEl = el.querySelector('[data-slot="pillType"]');
-    const chipEl = el.querySelector('.cp-incident');
+    var typeEl = el.querySelector('[data-slot="pillType"]');
+    var chipEl = el.querySelector('.cp-incident');
     if (chipEl) {
-      const type = typeEl ? (typeEl.textContent || '').trim().toLowerCase() : '';
-      const typeClass = (type === 'sev' || type === 'resolved' || type === 'neutral') ? type : 'neutral';
+      var type = typeEl ? (typeEl.textContent || '').trim().toLowerCase() : '';
+      var typeClass = (type === 'sev' || type === 'resolved' || type === 'neutral') ? type : 'neutral';
       chipEl.classList.add(typeClass);
     }
   }
 
   if (variant === 'legend') {
-    const itemsEl = el.querySelector('[data-slot="legendItems"]');
+    var itemsEl = el.querySelector('[data-slot="legendItems"]');
     if (itemsEl && itemsEl.textContent) {
-      const lines = itemsEl.textContent.split('\n').filter(l => l.trim());
+      var lines = itemsEl.textContent.split('\n').filter(l => l.trim());
       itemsEl.setAttribute('data-no-jump', '1');
-      itemsEl.innerHTML = lines.map((line, idx) => {
-        const [rawType, ...rest] = line.split('|');
-        const chipType = rawType.trim().toLowerCase();
-        const label = rest.join('|').trim();
-        const chipClass =
+      itemsEl.innerHTML = lines.mapfunction((line, idx) {
+        var [rawType, ...rest] = line.split('|');
+        var chipType = rawType.trim().toLowerCase();
+        var label = rest.join('|').trim();
+        var chipClass =
           chipType === 'gate' ? 'le-chip gate' :
           chipType === 'ok' ? 'le-chip ok' :
           chipType === 'bad' ? 'le-chip bad' :
@@ -273,19 +275,19 @@ export function mount(el, api) {
         return `<button type="button" class="le-item" data-le-idx="${idx}" data-le-type="${esc(chipType)}"><i class="${chipClass}"></i>${esc(label)}</button>`;
       }).join('');
       // 持久化 active 集合（多选）
-      const activeSet = new Set(api.state.get('activeTypes', []) || []);
-      const items = itemsEl.querySelectorAll('.le-item');
-      const sync = () => {
-        items.forEach((it) => {
-          const t = it.getAttribute('data-le-type') || '';
+      var activeSet = new Set(api.state.get('activeTypes', []) || []);
+      var items = itemsEl.querySelectorAll('.le-item');
+      var sync = function() {
+        items.forEachfunction((it) {
+          var t = it.getAttribute('data-le-type') || '';
           it.classList.toggle('active', activeSet.has(t));
         });
       };
       sync();
-      items.forEach((it) => {
-        it.addEventListener('click', (e) => {
+      items.forEachfunction((it) {
+        it.addEventListener('click', function(e) {
           e.stopPropagation();
-          const t = it.getAttribute('data-le-type') || '';
+          var t = it.getAttribute('data-le-type') || '';
           if (activeSet.has(t)) activeSet.delete(t); else activeSet.add(t);
           api.state.set('activeTypes', Array.from(activeSet));
           sync();
@@ -294,7 +296,8 @@ export function mount(el, api) {
       });
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample

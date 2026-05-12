@@ -248,23 +248,24 @@ rolloutSteps:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+(function() {
+  document.querySelectorAll('.comp-progress').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
+  var esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
   if (variant === 'bars') {
-    const itemsEl = el.querySelector('[data-slot="barsItems"]');
+    var itemsEl = el.querySelector('[data-slot="barsItems"]');
     if (itemsEl && itemsEl.textContent) {
-      const lines = itemsEl.textContent.split('\n').map(v => v.trim()).filter(Boolean);
-      itemsEl.innerHTML = lines.map(line => {
-        const parts = line.split('|').map(v => v.trim());
-        const title = parts[0];
-        const pct = parts[1] || '';
-        const note = parts[2] || '';
+      var lines = itemsEl.textContent.split('\n').map(v => v.trim()).filter(Boolean);
+      itemsEl.innerHTML = lines.map(function(line) {
+        var parts = line.split('|').map(v => v.trim());
+        var title = parts[0];
+        var pct = parts[1] || '';
+        var note = parts[2] || '';
         if (!title) return '';
-        const numPct = Math.max(0, Math.min(100, parseInt(pct) || 0));
+        var numPct = Math.max(0, Math.min(100, parseInt(pct) || 0));
         return `<li>
           <div class="prog-head">
             <span class="prog-title">${esc(title)}</span>
@@ -278,31 +279,32 @@ export function mount(el, api) {
   }
 
   if (variant === 'item') {
-    const pctEl = el.querySelector('[data-slot="itemPct"]');
+    var pctEl = el.querySelector('[data-slot="itemPct"]');
     if (pctEl) {
-      const pctRaw = (pctEl.textContent || '').trim();
-      const match = pctRaw.match(/(\d+)/);
-      const width = match ? match[1] : '0';
-      const fillEl = el.querySelector('.cp-item-fill');
+      var pctRaw = (pctEl.textContent || '').trim();
+      var match = pctRaw.match(/(\d+)/);
+      var width = match ? match[1] : '0';
+      var fillEl = el.querySelector('.cp-item-fill');
       if (fillEl) fillEl.style.width = width + '%';
     }
   }
 
   if (variant === 'rollout') {
-    const stepsEl = el.querySelector('[data-slot="rolloutSteps"]');
+    var stepsEl = el.querySelector('[data-slot="rolloutSteps"]');
     if (stepsEl && stepsEl.textContent) {
-      const lines = stepsEl.textContent.split('\n').map(v => v.trim()).filter(Boolean);
-      stepsEl.innerHTML = lines.map(line => {
-        const parts = line.split('|').map(v => v.trim());
-        const when = parts[0] || '';
-        const pct = parts[1] || '';
-        const d = parts[2] || '';
+      var lines = stepsEl.textContent.split('\n').map(v => v.trim()).filter(Boolean);
+      stepsEl.innerHTML = lines.map(function(line) {
+        var parts = line.split('|').map(v => v.trim());
+        var when = parts[0] || '';
+        var pct = parts[1] || '';
+        var d = parts[2] || '';
         if (!when && !pct && !d) return '';
         return `<div class="step">${when ? `<div class="when">${esc(when)}</div>` : ''}${pct ? `<div class="pct">${esc(pct)}</div>` : ''}${d ? `<div class="d">${esc(d)}</div>` : ''}</div>`;
       }).join('');
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample

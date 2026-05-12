@@ -131,7 +131,7 @@ sampleContent:
 ```html
 <div class="comp-info-panel" data-section="info-panel" data-variant="{{variant}}">
   <!-- variant: approach -->
-  <article class="ip-approach">
+  <article class="ip-approach ip-pane">
     <header class="ip-head">
       <h3 data-slot="approachTitle">
         <span class="ip-num" data-slot="approachNum"></span>
@@ -147,7 +147,7 @@ sampleContent:
   </article>
 
   <!-- variant: variant -->
-  <div class="ip-variant" data-slot-style="variantStyle">
+  <div class="ip-variant ip-pane" data-slot-style="variantStyle">
     <span class="ip-vlabel" data-slot="variantLabel"></span>
     <div class="ip-vinner">
       <div class="ip-vhead">
@@ -165,7 +165,7 @@ sampleContent:
   </div>
 
   <!-- variant: detail -->
-  <div class="ip-detail">
+  <div class="ip-detail ip-pane">
     <div class="ip-dhint" data-slot="panelHint"></div>
     <div class="ip-dtitle" data-slot="panelTitle"></div>
     <div class="ip-dmeta" data-slot="panelMeta"></div>
@@ -174,7 +174,7 @@ sampleContent:
   </div>
 
   <!-- variant: sample -->
-  <div class="ip-sample">
+  <div class="ip-sample ip-pane">
     <div class="ip-shead">
       <span class="ip-sbadge" data-slot="sampleLabel"></span>
       <span class="ip-sname" data-slot="sampleName"></span>
@@ -189,6 +189,15 @@ sampleContent:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的内部 pane ===== */
+.comp-info-panel .ip-pane { display: none; }
+.comp-info-panel[data-variant="approach"] .ip-approach,
+.comp-info-panel[data-variant="variant"]  .ip-variant,
+.comp-info-panel[data-variant="detail"]   .ip-detail,
+.comp-info-panel[data-variant="sample"]   .ip-sample {
+  display: block;
+}
+
 .comp-info-panel {
   background: var(--white);
   border: var(--border);
@@ -520,82 +529,94 @@ sampleContent:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
+(function() {
+  var esc = function(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  };
 
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
+  // data-slot 的值可能是裸 textContent，也可能是多个子节点（forge data 类型注入）
+  function readDataSlot(el) {
+    if (!el) return '';
+    var kids = el.querySelectorAll('div, p, li, span');
+    if (kids.length > 0) {
+      return Array.from(kids).map(function(k){ return k.textContent.trim(); }).filter(Boolean).join('\n');
+    }
+    return el.textContent.trim();
+  }
 
-  if (variant === 'approach') {
-    // Build tradeoffs table from data slots（pros 和 cons 各自是 hidden span，写到外层 .ip-tradeoffs）
-    const wrap = el.querySelector('.ip-tradeoffs');
-    if (wrap) {
-      const prosEl = wrap.querySelector('[data-slot="approachPros"]');
-      const consEl = wrap.querySelector('[data-slot="approachCons"]');
-      const prosRaw = prosEl ? (prosEl.getAttribute('data-value') || prosEl.textContent || '') : '';
-      const consRaw = consEl ? (consEl.getAttribute('data-value') || consEl.textContent || '') : '';
-      const pros = prosRaw.split('\n').map(v => v.trim()).filter(Boolean);
-      const cons = consRaw.split('\n').map(v => v.trim()).filter(Boolean);
-      const maxRows = Math.max(pros.length, cons.length);
-      if (maxRows > 0) {
-        let rowsHtml = '<div class="ip-trow ip-thead"><div class="ip-tcell">Pro</div><div class="ip-tcell">Con</div></div>';
-        for (let i = 0; i < maxRows; i++) {
-          rowsHtml += `<div class="ip-trow"><div class="ip-tcell ip-tpro">${esc(pros[i] || '')}</div><div class="ip-tcell ip-tcon">${esc(cons[i] || '')}</div></div>`;
+  document.querySelectorAll('.comp-info-panel').forEach(function(el) {
+    var variant = el.getAttribute('data-variant');
+
+    if (variant === 'approach') {
+      // tradeoffs 表格
+      var wrap = el.querySelector('.ip-tradeoffs');
+      if (wrap) {
+        var prosEl = wrap.querySelector('[data-slot="approachPros"]');
+        var consEl = wrap.querySelector('[data-slot="approachCons"]');
+        var pros = readDataSlot(prosEl).split('\n').map(function(v){ return v.trim(); }).filter(Boolean);
+        var cons = readDataSlot(consEl).split('\n').map(function(v){ return v.trim(); }).filter(Boolean);
+        var maxRows = Math.max(pros.length, cons.length);
+        if (maxRows > 0) {
+          var rowsHtml = '<div class="ip-trow ip-thead"><div class="ip-tcell">Pro</div><div class="ip-tcell">Con</div></div>';
+          for (var i = 0; i < maxRows; i++) {
+            rowsHtml += '<div class="ip-trow"><div class="ip-tcell ip-tpro">' + esc(pros[i] || '') + '</div><div class="ip-tcell ip-tcon">' + esc(cons[i] || '') + '</div></div>';
+          }
+          wrap.innerHTML = rowsHtml;
         }
-        wrap.innerHTML = rowsHtml;
+      }
+
+      // chips
+      var chipsEl = el.querySelector('[data-slot="approachTags"]');
+      if (chipsEl) {
+        var tagsRaw = readDataSlot(chipsEl);
+        var tags = tagsRaw.split('\n').map(function(v){ return v.trim(); }).filter(Boolean);
+        var chipItems = tags.map(function(t) {
+          var colonIdx = t.indexOf(':');
+          if (colonIdx === -1) return '<span class="ip-chip">' + esc(t) + '</span>';
+          var key = t.slice(0, colonIdx).trim();
+          var val = t.slice(colonIdx + 1).trim();
+          return '<span class="ip-chip">' + esc(key) + ': <strong>' + esc(val) + '</strong></span>';
+        });
+        chipsEl.innerHTML = chipItems.join('\n  ');
       }
     }
 
-    // Build chips from data slot
-    const chipsEl = el.querySelector('[data-slot="approachTags"]');
-    if (chipsEl) {
-      const raw = chipsEl.getAttribute('data-value') || chipsEl.textContent || '';
-      const tags = raw.split('\n').map(v => v.trim()).filter(Boolean);
-      const chipItems = tags.map(t => {
-        const colonIdx = t.indexOf(':');
-        if (colonIdx === -1) return `<span class="ip-chip">${esc(t)}</span>`;
-        const key = t.slice(0, colonIdx).trim();
-        const val = t.slice(colonIdx + 1).trim();
-        return `<span class="ip-chip">${esc(key)}: <strong>${esc(val)}</strong></span>`;
-      });
-      chipsEl.innerHTML = chipItems.join('\n  ');
-    }
-  }
+    if (variant === 'variant') {
+      // variantStyle → class modifier
+      var styleEl = el.querySelector('[data-slot="variantStyle"]');
+      if (styleEl) {
+        var styleVal = styleEl.textContent.trim().toLowerCase();
+        if (styleVal && /^[a-z][a-z0-9-]*$/.test(styleVal)) {
+          var inner = el.querySelector('.ip-vinner');
+          if (inner) inner.classList.add('vstyle-' + styleVal);
+        }
+        styleEl.style.display = 'none';
+      }
 
-  if (variant === 'variant') {
-    // variantStyle slot: 用作样式 modifier（如 "olive" / "compact"）
-    const styleEl = el.querySelector('[data-slot="variantStyle"]');
-    if (styleEl) {
-      const styleVal = (styleEl.textContent || '').trim().toLowerCase();
-      if (styleVal && /^[a-z][a-z0-9-]*$/.test(styleVal)) {
-        const inner = el.querySelector('.ip-vinner');
-        if (inner) inner.classList.add('vstyle-' + styleVal);
+      // chips
+      var vChipsEl = el.querySelector('[data-slot="cardChips"]');
+      if (vChipsEl) {
+        var raw = vChipsEl.textContent || '';
+        var chips = raw.split(',').map(function(c){ return c.trim(); }).filter(Boolean);
+        vChipsEl.innerHTML = chips.map(function(c, i) {
+          var cls = i === 1 ? 'ip-vchip olive' : 'ip-vchip';
+          return '<span class="' + cls + '">' + esc(c) + '</span>';
+        }).join('');
       }
     }
 
-    // Parse chips
-    const chipsEl = el.querySelector('[data-slot="cardChips"]');
-    if (chipsEl) {
-      const raw = chipsEl.textContent || '';
-      const chips = raw.split(',').map(c => c.trim()).filter(Boolean);
-      chipsEl.innerHTML = chips.map((c, i) => {
-        const cls = i === 1 ? 'ip-vchip olive' : 'ip-vchip';
-        return `<span class="${cls}">${esc(c)}</span>`;
-      }).join('');
+    if (variant === 'sample') {
+      var planEl = el.querySelector('[data-slot="samplePlan"]');
+      if (planEl) {
+        var plan = planEl.textContent.trim().toLowerCase();
+        if (plan === 'team') planEl.classList.add('team');
+        if (plan === 'studio') planEl.classList.add('studio');
+      }
     }
-  }
-
-  if (variant === 'sample') {
-    // Plan badge class
-    const planEl = el.querySelector('[data-slot="samplePlan"]');
-    if (planEl) {
-      const plan = (planEl.textContent || '').trim().toLowerCase();
-      if (plan === 'team') planEl.classList.add('team');
-      if (plan === 'studio') planEl.classList.add('studio');
-    }
-  }
-}
+  });
+})();
 ```
 
 ## Sample

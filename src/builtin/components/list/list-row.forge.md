@@ -298,23 +298,24 @@ entryCode:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+(function() {
+  document.querySelectorAll('.comp-list-row').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
+  var esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
   if (variant === 'pr') {
-    const riskEl = el.querySelector('[data-slot="shippedRisk"]');
+    var riskEl = el.querySelector('[data-slot="shippedRisk"]');
     if (riskEl) {
-      const risk = (riskEl.textContent || '').trim().toLowerCase();
-      const riskClass = risk === 'high' ? 'high' : risk === 'med' ? 'med' : 'low';
+      var risk = (riskEl.textContent || '').trim().toLowerCase();
+      var riskClass = risk === 'high' ? 'high' : risk === 'med' ? 'med' : 'low';
       riskEl.classList.add(riskClass);
     }
 
-    const prEl = el.querySelector('[data-slot="shippedPr"]');
+    var prEl = el.querySelector('[data-slot="shippedPr"]');
     if (prEl) {
-      const num = (prEl.textContent || '').trim();
+      var num = (prEl.textContent || '').trim();
       if (num) {
         prEl.innerHTML = `<a href="#">${esc(num)}</a>`;
       }
@@ -322,11 +323,11 @@ export function mount(el, api) {
   }
 
   if (variant === 'file') {
-    const riskEl = el.querySelector('[data-slot="fileRisk"]');
-    const riskLabelEl = el.querySelector('[data-slot="fileRiskLabel"]');
+    var riskEl = el.querySelector('[data-slot="fileRisk"]');
+    var riskLabelEl = el.querySelector('[data-slot="fileRiskLabel"]');
     if (riskEl) {
-      const risk = (riskEl.textContent || '').trim().toLowerCase();
-      const valid = ['safe', 'medium', 'attention'];
+      var risk = (riskEl.textContent || '').trim().toLowerCase();
+      var valid = ['safe', 'medium', 'attention'];
       if (valid.includes(risk)) {
         riskEl.classList.add(risk);
       }
@@ -336,29 +337,30 @@ export function mount(el, api) {
       }
     }
 
-    const addedEl = el.querySelector('[data-slot="fileAdded"]');
-    const deletedEl = el.querySelector('[data-slot="fileDeleted"]');
-    const addedTxt = (addedEl?.textContent || '').trim();
-    const deletedTxt = (deletedEl?.textContent || '').trim();
+    var addedEl = el.querySelector('[data-slot="fileAdded"]');
+    var deletedEl = el.querySelector('[data-slot="fileDeleted"]');
+    var addedTxt = ((addedEl && addedEl.textContent) || '').trim();
+    var deletedTxt = ((deletedEl && deletedEl.textContent) || '').trim();
     if (addedTxt || deletedTxt) {
-      let html = '';
+      var html = '';
       if (addedTxt) html += `<span class="add">${esc(addedTxt)}</span>`;
       if (addedTxt && deletedTxt) html += ' ';
       if (deletedTxt) html += `<span class="del">${esc(deletedTxt)}</span>`;
-      const deltaEl = el.querySelector('.lr-fdelta');
+      var deltaEl = el.querySelector('.lr-fdelta');
       if (deltaEl) deltaEl.innerHTML = html;
     }
   }
 
   if (variant === 'entry') {
-    const badgeEl = el.querySelector('[data-slot="entryBadge"]');
+    var badgeEl = el.querySelector('[data-slot="entryBadge"]');
     if (badgeEl) {
-      const badge = (badgeEl.textContent || '').trim().toLowerCase();
-      const cls = badge === 'new' ? 'new' : badge === 'del' ? 'del' : 'mod';
+      var badge = (badgeEl.textContent || '').trim().toLowerCase();
+      var cls = badge === 'new' ? 'new' : badge === 'del' ? 'del' : 'mod';
       badgeEl.classList.add(cls);
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample

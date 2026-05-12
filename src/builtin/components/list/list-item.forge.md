@@ -116,6 +116,18 @@ actionDue:
 ## CSS
 
 ```css
+/* ===== 变体隔离：只显示当前 variant 对应的 pane ===== */
+.comp-list-item .li-shipped,
+.comp-list-item .li-carryover,
+.comp-list-item .li-focus,
+.comp-list-item .li-action {
+  display: none;
+}
+.comp-list-item[data-variant="shipped"] .li-shipped { display: block; }
+.comp-list-item[data-variant="carryover"] .li-carryover { display: block; }
+.comp-list-item[data-variant="focus"] .li-focus { display: block; }
+.comp-list-item[data-variant="action"] .li-action { display: block; }
+
 .comp-list-item {
   background: transparent;
 }
@@ -298,12 +310,13 @@ actionDue:
 ## JS
 
 ```js
-export function mount(el, api) {
-  const variant = el.getAttribute('data-variant');
+(function() {
+  document.querySelectorAll('.comp-list-item').forEach(function(el) {
+  var variant = el.getAttribute('data-variant');
 
   if (variant === 'action') {
-    const doneSlot = el.querySelector('[data-slot="actionDone"]');
-    const isDone = doneSlot && (doneSlot.textContent || '').trim().toLowerCase() === 'done';
+    var doneSlot = el.querySelector('[data-slot="actionDone"]');
+    var isDone = doneSlot && (doneSlot.textContent || '').trim().toLowerCase() === 'done';
     if (isDone) {
       el.classList.add('done');
     }
@@ -311,14 +324,15 @@ export function mount(el, api) {
 
   if (variant === 'carryover') {
     // Move owner into body with prefix
-    const bodyEl = el.querySelector('[data-slot="carryBody"]');
-    const ownerEl = el.querySelector('[data-slot="carryOwner"]');
+    var bodyEl = el.querySelector('[data-slot="carryBody"]');
+    var ownerEl = el.querySelector('[data-slot="carryOwner"]');
     if (bodyEl && ownerEl && ownerEl.textContent && ownerEl.textContent.trim()) {
       bodyEl.innerHTML = bodyEl.textContent + ' <span class="li-owner">· ' + ownerEl.textContent.trim() + '</span>';
       ownerEl.style.display = 'none';
     }
   }
-}
+  });
+})();
 ```
 
 ## Sample
