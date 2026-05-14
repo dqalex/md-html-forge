@@ -7,12 +7,16 @@
  * 用户代码要扩展系统时只需：
  *   import { forgeRegistry } from '@/builtin/compiler/registry';
  *   forgeRegistry.registerComponent(myDef);
+ *
+ * 注意：图标相关注册（LUCIDE_RULES）已移至 'md-html-forge/icons' 子路径。
+ * 主包只注册组件 + 主题，不依赖 React。
+ * 如需图标支持，请在应用入口额外执行：
+ *   import 'md-html-forge/icons';  // 副作用：注册 LUCIDE_RULES
  */
 
 import { forgeRegistry } from './compiler/registry';
 import { BUILTIN_COMPONENTS } from './components';
 import { BUILTIN_THEMES } from './themes';
-import { LUCIDE_RULES } from './inline-rules/lucide';
 
 let booted = false;
 
@@ -22,7 +26,6 @@ export function bootstrapForge(): void {
 
   forgeRegistry.registerComponents(BUILTIN_COMPONENTS);
   forgeRegistry.registerThemes(BUILTIN_THEMES);
-  for (const rule of LUCIDE_RULES) forgeRegistry.registerInlineRule(rule);
 
   // 指令目前都是"core directive"（由 lexer/parser 直接支持），
   // 这里先登记元数据用于未来的文档 / 组件浏览器 help 面板

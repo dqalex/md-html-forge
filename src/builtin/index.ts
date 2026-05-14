@@ -79,3 +79,7 @@ export type {
 // 插件注册
 export { forgeRegistry } from './compiler/registry';
 export type { Registry, InlineRule, DirectivePlugin } from './compiler/registry';
+
+// 兜底渲染
+export { renderWithFallback, parseComposeDirective as parseComposeDirectiveFromFallback } from './fallback-renderer';
+export type { RenderResult } from './fallback-renderer';

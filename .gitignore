@@ -7,6 +7,14 @@
 /.next/
 /out/
 
+# library build output
+/dist/
+
+# build-forge-md temporary files
+.forge-md-generated.json
+*.forge.md.generated.ts
+*.html.generated.ts
+
 # misc
 .DS_Store
 *.pem

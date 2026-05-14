@@ -9,10 +9,12 @@
  *   :icon:check-square:      → 同上（别名）
  *
  * 扩展图标：在 ICON_MAP 加一行 import + 映射
+ *
+ * ⚠️ React / lucide-react 为 peerDependencies（可选）。
+ * 当环境中没有 React 时，renderLucideIcon 返回空字符串，
+ * 不会阻断整个模块加载。
  */
 
-import { createElement, type ComponentType } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 import {
   CheckSquare, FileText, Wrench, ClipboardList, Users, Bot,
   Send, Clock, MessageSquare, LayoutDashboard, Calendar,
@@ -37,7 +39,7 @@ import {
 } from 'lucide-react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type IconComponent = ComponentType<any>;
+type IconComponent = any;
 
 const ICON_MAP: Record<string, IconComponent> = {
   // General
@@ -89,8 +91,31 @@ const ICON_MAP: Record<string, IconComponent> = {
 // SVG 缓存（同一图标多次渲染只调一次 renderToStaticMarkup）
 const cache = new Map<string, string>();
 
+// 懒加载 React 渲染函数，避免在非 React 环境中立即报错
+let _createElement: typeof import('react').createElement | null = null;
+let _renderToStaticMarkup: typeof import('react-dom/server').renderToStaticMarkup | null = null;
+let _reactAvailable: boolean | null = null;
+
+function tryLoadReact(): boolean {
+  if (_reactAvailable !== null) return _reactAvailable;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const React = require('react');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const ReactDOMServer = require('react-dom/server');
+    _createElement = React.createElement;
+    _renderToStaticMarkup = ReactDOMServer.renderToStaticMarkup;
+    _reactAvailable = true;
+  } catch {
+    _reactAvailable = false;
+  }
+  return _reactAvailable;
+}
+
 /**
  * 渲染单个 lucide 图标为 SVG 字符串
+ *
+ * 当 React 不可用时返回空字符串，不会抛错
  */
 export function renderLucideIcon(
   name: string,
@@ -98,6 +123,8 @@ export function renderLucideIcon(
 ): string {
   const Comp = ICON_MAP[name];
   if (!Comp) return '';
+
+  if (!tryLoadReact()) return '';
 
   const {
     size = 18,
@@ -111,7 +138,7 @@ export function renderLucideIcon(
   if (cached) return cached;
 
   try {
-    const element = createElement(Comp, {
+    const element = _createElement!(Comp, {
       size,
       color,
       strokeWidth,
@@ -119,7 +146,7 @@ export function renderLucideIcon(
       'aria-label': name,
       style: { display: 'inline-block', verticalAlign: '-0.15em' },
     });
-    const svg = renderToStaticMarkup(element);
+    const svg = _renderToStaticMarkup!(element);
     cache.set(cacheKey, svg);
     return svg;
   } catch (e) {
