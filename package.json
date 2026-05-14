@@ -1,6 +1,6 @@
 {
   "name": "md-html-forge",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Markdown → styled HTML rendering engine with 30+ built-in components, theme system, and slot-based template sync.",
   "keywords": [
     "markdown",
@@ -52,10 +52,7 @@
     "README.md",
     "LICENSE"
   ],
-  "sideEffects": [
-    "./dist/icons.js",
-    "./dist/icons.mjs"
-  ],
+  "sideEffects": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
